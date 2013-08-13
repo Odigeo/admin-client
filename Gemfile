@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'rails', '4.0.0'
-gem "ocean", git: "git://github.com/OceanDev/ocean.git"
+gem "ocean-rails", git: "git://github.com/OceanDev/ocean-rails.git"
 
 gem 'net-purge'          # For Varnish purges
 gem 'rack-attack'        # HTTP Whitelist/Blacklist and Request Rate Limiter for Rack Applications
