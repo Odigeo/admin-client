@@ -63,7 +63,7 @@ GEM
     multi_json (1.7.9)
     multipart-post (1.2.0)
     net-purge (0.1.0)
-    ocean-rails (1.15.1)
+    ocean-rails (1.15.3)
       faraday
       faraday_middleware
       ffi-rzmq
