@@ -1,7 +1,5 @@
 AdminClient::Application.routes.draw do
 
-  get "/alive" => "alive#index"
-
   match '/javascripts/.config/config.js' => "js_file#index",
     :via => :get
 
