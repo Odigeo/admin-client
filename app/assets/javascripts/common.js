@@ -78,7 +78,6 @@ var PAPI = PAPIBase.extend({
     }, null);
   },
   login: function(data, success_callback, error_callback) {
-    /*
     var data2 = {};
     if(data.login && data.password) {
       data2.credentials = $.base64.encode(data.login + ':' + data.password);
@@ -93,10 +92,6 @@ var PAPI = PAPIBase.extend({
     };
 
     PAPI.apiCall(url, data2, 'POST', success_callback, error_callback);
-    */;
-    var fake_login = {};
-    fake_login.authentication = "abcdefgh12345678";
-    success_callback(fake_login);
   },
   getKeys: function(data, success) {
     var url = "";
