@@ -27,7 +27,7 @@ GEM
       tzinfo (~> 0.3.37)
     arel (4.0.1)
     atomic (1.1.14)
-    aws-sdk (1.29.1)
+    aws-sdk (1.30.0)
       json (~> 1.4)
       nokogiri (>= 1.4.4)
       uuidtools (~> 2.1)
@@ -75,7 +75,7 @@ GEM
       activemodel (~> 4.0)
       activesupport (~> 4.0)
       aws-sdk (~> 1.0)
-    ocean-rails (1.25.3)
+    ocean-rails (1.26.2)
       faraday
       faraday_middleware
       ffi (= 1.9.0)
@@ -146,7 +146,7 @@ GEM
     typhoeus (0.6.6)
       ethon (~> 0.6.1)
     tzinfo (0.3.38)
-    uglifier (2.3.2)
+    uglifier (2.3.3)
       execjs (>= 0.3.0)
       json (>= 1.8.0)
     uuidtools (2.1.4)
@@ -168,7 +168,7 @@ DEPENDENCIES
   multi_json (~> 1.0)
   net-purge
   ocean-dynamo (>= 0.3.1)
-  ocean-rails (~> 1.0)
+  ocean-rails (>= 1.26.2)
   rack-attack
   rails (~> 4.0)
   rspec-rails (~> 2.0)
