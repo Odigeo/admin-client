@@ -19,12 +19,6 @@ describe "Routing to the root path" do
                                     :js_app_name => "start")
   end
   
-  it "should not accept HEAD requests" do
-    { :head => "/"}.should_not be_routable
-    { :head => "/something"}.should_not be_routable
-  end
-  
-  
   it "should not accept POST requests" do
     { :post => "/"}.should_not be_routable
     { :post => "/something"}.should_not be_routable
