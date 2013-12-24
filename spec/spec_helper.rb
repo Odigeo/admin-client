@@ -46,12 +46,12 @@ ocean_env = ENV['GIT_BRANCH'] ||       # Only available on the TeamCity test age
                                        # something else, as you then will change it
                                        # for everyone.
 ocean_env = "master" if ocean_env == "<default>"
-ocean_host = "#{ocean_env}-webshop.#{BASE_DOMAIN}"      # The naming scheme prevents the use of prod (intentional)
+ocean_host = "#{ocean_env}-admin.#{BASE_DOMAIN}"      # The naming scheme prevents the use of prod (intentional)
 if Rails.env == "development"
   client_host = "http://localhost"
   client_port = 3005
 else
-  client_host = "http://#{ocean_env}-webshop.#{BASE_DOMAIN}"
+  client_host = "http://#{ocean_env}-admin.#{BASE_DOMAIN}"
   client_port = 80
 end
 
