@@ -46,10 +46,15 @@ ocean_env = ENV['GIT_BRANCH'] ||       # Only available on the TeamCity test age
                                        # something else, as you then will change it
                                        # for everyone.
 ocean_env = "master" if ocean_env == "<default>"
-#ocean_host = "#{ocean_env}-webshop.travelservices.se"   # The naming scheme prevents the use of prod (intentional)
-ocean_host = "#{ocean_env}-webshop-lb.travelservices.se" # ... but use this until we have SSL.
-client_host = Rails.env == "development" ? "http://localhost" : "http://localhost" #"http://#{ocean_env}-webshop-lb.travelservices.se"
-client_port = Rails.env == "development" ? 3005 : 80
+ocean_host = "#{ocean_env}-webshop.#{BASE_DOMAIN}"      # The naming scheme prevents the use of prod (intentional)
+if Rails.env == "development"
+  client_host = "http://localhost"
+  client_port = 3005
+else
+  client_host = "http://#{ocean_env}-webshop.#{BASE_DOMAIN}"
+  client_port = 80
+end
+
 
 # Configure Watir
 WatirWebdriverRails.host = client_host
