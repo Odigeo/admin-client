@@ -39,21 +39,12 @@ end
 
 
 # Figure out the external URI of the webapp against which to test the front end.
-dns_name = "admin"                      # Set this to your client apps' DNS name
-# DO NOT modify the code below; use the provided environment variables to tailor 
-# the behaviour instead.
-if Rails.env == "development"
-  client_host = ENV['CLIENT_HOST'] || "http://localhost"
-  client_port = ENV['CLIENT_PORT'] || 3000
-else
-  ocean_env = ENV['GIT_BRANCH'] ||      # Only available on the TeamCity test agents.
-              ENV['OCEAN_FRONTEND'] ||  # Set OCEAN_FRONTEND in your developer environment if
-              "master"                  # you need to run your local tests against
-                                        # anything other than master.
-  ocean_env = "master" if ocean_env == "<default>"
-  client_host = "http://#{ocean_env}-#{dns_name}.#{BASE_DOMAIN}"
-  client_port = 80
-end
+dns_name = "admin"                # Set this to your client apps' DNS name
+# Don't modify any of these, set environment vars instead.
+ocean_env = ENV['GIT_BRANCH'] || ENV['OCEAN_FRONTEND'] || "master"
+ocean_env = "master" if ocean_env == "<default>"
+client_host = ENV['CLIENT_HOST'] || "http://#{ocean_env}-#{dns_name}.#{BASE_DOMAIN}"
+client_port = ENV['CLIENT_PORT'] || 80
 
 
 # Configure Watir
