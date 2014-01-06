@@ -38,13 +38,13 @@ RSpec.configure do |config|
 end
 
 
-# Figure out the external URI of the webapp against which to test the front end.
-dns_name = "admin"                # Set this to your client apps' DNS name
-# Don't modify any of these, set environment vars instead.
-ocean_env = ENV['GIT_BRANCH'] || ENV['OCEAN_FRONTEND'] || "master"
-ocean_env = "master" if ocean_env == "<default>"
-client_host = ENV['CLIENT_HOST'] || "http://#{ocean_env}-#{dns_name}.#{BASE_DOMAIN}"
-client_port = ENV['CLIENT_PORT'] || 80
+# Set up the host and port of the client app being tested 
+client_host = ENV['CLIENT_HOST'] || "http://localhost"
+client_port = ENV['CLIENT_PORT'] || 3000 
+
+# Set up the user and password of the user used to log in to perform the tests
+TEST_API_USER = ENV['TEST_API_USER'] || TEST_API_USER
+TEST_API_PASSWORD = ENV['TEST_API_PASSWORD'] || TEST_API_PASSWORD
 
 
 # Configure Watir
