@@ -44,8 +44,11 @@ client_port = ENV['CLIENT_PORT'] || 3000
 
 # Set up the user and password of the user used to log in to perform the tests
 TEST_API_USER = ENV['TEST_API_USER'] || TEST_API_USER
-TEST_API_PASSWORD = ENV['TEST_API_PASSWORD'] || TEST_API_PASSWORD
 
+tapw = ENV['TEST_API_PASSWORD'] || TEST_API_PASSWORD
+master, staging = tapw.split(',')
+tapw = (ENV['GIT_BRANCH'] == 'staging' ? staging : master) if staging.present?
+TEST_API_PASSWORD = tapw
 
 # Configure Watir
 WatirWebdriverRails.host = client_host
