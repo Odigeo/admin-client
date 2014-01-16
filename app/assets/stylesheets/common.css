@@ -635,8 +635,8 @@ textarea {
 }
 
 .gradientButton:active {
-	position: relative;
-	top: 1px;
+	/*position: relative;
+	top: 1px;*/
 }
 
 .closeButton {
