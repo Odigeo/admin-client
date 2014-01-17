@@ -479,14 +479,9 @@ var BoxItem = DragAndDropWidget.extend({
 		return false;
 	},
 	getLink: function(rel) {
-		if(typeof this.data.links === "object") {
-			var links = this.data.links;
-			for(var i=0;i<links.length;i++) {
-				if(links[i].rel == rel) {
-					return links[i].href;
-				}
-			}
-			//console.log("No " + rel + " link");
+		if(typeof this.data._links === "object" && this.data["_links"][rel]) {
+			return this.data["_links"][rel].href;
+		} else {
 			return null;
 		}
 	},
@@ -506,7 +501,7 @@ var UserItem = BoxItem.extend({
 		this.render(data.username);
 	},
 	render: function(name) {
-		var label = new Label(name, true);
+		var label = new Text(name, true);
 
 		label.setStyleName("box-item-label");
 
@@ -522,7 +517,7 @@ var GroupItem = BoxItem.extend({
 		this.render(data.name);
 	},
 	render: function(name) {
-		var label = new Label(name, true);
+		var label = new Text(name, true);
 
 		label.setStyleName("box-item-label");
 
@@ -538,7 +533,7 @@ var RoleItem = BoxItem.extend({
 		this.render(data.name);
 	},
 	render: function(name) {
-		var label = new Label(name, true);
+		var label = new Text(name, true);
 
 		label.setStyleName("box-item-label");
 
@@ -554,7 +549,7 @@ var RightItem = BoxItem.extend({
 		this.render(data.name);
 	},
 	render: function(name) {
-		var label = new Label(name, true);
+		var label = new Text(name, true);
 
 		label.setStyleName("box-item-label");
 
@@ -889,11 +884,11 @@ var CreateBox = FlowPanel.extend({
 		var header = new Header2("Create new user");
 
 		// User special label inputs
-		var usernameL = new Label("Username");
-		var passwordL = new Label("Password");
-		var repasswordL = new Label("Enter password again");
-		var realnameL = new Label("Real name");
-		var emailL = new Label("Email");
+		var usernameL = new Text("Username");
+		var passwordL = new Text("Password");
+		var repasswordL = new Text("Enter password again");
+		var realnameL = new Text("Real name");
+		var emailL = new Text("Email");
 		var usernameI = new TextBox(function() {
 			// Validation
 			var value = $(this.getElement()).val();
@@ -1022,8 +1017,8 @@ var CreateBox = FlowPanel.extend({
 		var header = new Header2("Create a new Group");
 
 		// User special label inputs
-		var nameL = new Label("Name");
-		var descriptionL = new Label("Description");
+		var nameL = new Text("Name");
+		var descriptionL = new Text("Description");
 		var nameI = new TextBox(function() {
 			// Validation
 			var value = $(this.getElement()).val();
@@ -1104,8 +1099,8 @@ var CreateBox = FlowPanel.extend({
 		var header = new Header2("Create a new Role");
 
 		// User special label inputs
-		var nameL = new Label("Name");
-		var descriptionL = new Label("Description");
+		var nameL = new Text("Name");
+		var descriptionL = new Text("Description");
 		var nameI = new TextBox(function() {
 			// Validation
 			var value = $(this.getElement()).val();
@@ -1186,8 +1181,8 @@ var CreateBox = FlowPanel.extend({
 		var header = new Header2("Create a new Right");
 
 		// User special label inputs
-		var nameL = new Label("Name");
-		var descriptionL = new Label("Description");
+		var nameL = new Text("Name");
+		var descriptionL = new Text("Description");
 		var nameI = new TextBox(function() {
 			// Validation
 			var value = $(this.getElement()).val();
