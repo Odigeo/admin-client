@@ -665,8 +665,8 @@ var Cube = Widget.extend({
 					html.div({'class':'cube-side cube-bottom'}, '✿'),
 					html.div({'class':'cube-side cube-front'}, '✿'),
 					html.div({'class':'cube-side cube-back'}, '✿'),
-					html.div({'class':'cube-side cube-left'}, '✈'),
-					html.div({'class':'cube-side cube-right'}, '✈')
+					html.div({'class':'cube-side cube-left'}, '❀'),
+					html.div({'class':'cube-side cube-right'}, '❀')
 					));
 	}
 });
