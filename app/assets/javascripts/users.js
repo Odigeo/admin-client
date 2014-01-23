@@ -10,10 +10,10 @@ var TopConsole = FlowPanel.extend({
 		var fp = new FlowPanel();
 		var itemIcon = new FocusWidget(DOM.createDiv());
 		// Default labels and inputs
-		var nameL = new Label("Name");
-		var descriptionL = new Label("Description");
-		var createdL = new Label("Created");
-		var updatedL = new Label("Last updated");
+		var nameL = new Text("Name");
+		var descriptionL = new Text("Description");
+		var createdL = new Text("Created");
+		var updatedL = new Text("Last updated");
 		var nameI = new TextBox();
 		nameI.setAttributes({
 			'name':'name'
@@ -22,14 +22,14 @@ var TopConsole = FlowPanel.extend({
 		descriptionI.setAttributes({
 			'name':'description'
 		});
-		var createdI = new Label(itemWidget.data.created_at);
+		var createdI = new Text(itemWidget.data.created_at);
 		$(createdI.getElement()).attr('name', 'created_at');
-		var updatedI = new Label(itemWidget.data.updated_at);
+		var updatedI = new Text(itemWidget.data.updated_at);
 		$(updatedI.getElement()).attr('name', 'update_at');
 		// User special label inputs
-		var usernameL = new Label("Username");
-		var realnameL = new Label("Real name");
-		var emailL = new Label("Email");
+		var usernameL = new Text("Username");
+		var realnameL = new Text("Real name");
+		var emailL = new Text("Email");
 		var usernameI = new TextBox();
 		usernameI.setAttributes({
 			'name':'username'
@@ -230,7 +230,7 @@ var TopConsole = FlowPanel.extend({
 	},
 	render_empty_container: function() {
 		var holder = new FlowPanel();
-		var label = new Label("Drag and drop items here");
+		var label = new Text("Drag and drop items here");
 		var image = new FocusWidget(DOM.createDiv());
 
 		image.setStyleName("drag-drop-icon");
@@ -243,7 +243,7 @@ var TopConsole = FlowPanel.extend({
 	render_start_view: function() {
 		var holder = new FlowPanel();
 		var navigationPanel = new FlowPanel();
-		var label = new Label("Click on a item below to select. Or create a new.");
+		var label = new Text("Click on a item below to select. Or create a new.");
 		var dragHook = new FlowPanel();
 
 		navigationPanel.setId("navigation-panel-start");
@@ -649,7 +649,7 @@ var ContainerWidget = DragAndDropWidget.extend({
 		var self = this;
 
 		var header = new FlowPanel();
-		var headerL = new Label(name);
+		var headerL = new Text(name);
 		var createB = new GradientButton("+", function(e) {window.createBox.show(name);});
 		var searchI = new SearchBox();
 		this.container = new FromBucketContainer();

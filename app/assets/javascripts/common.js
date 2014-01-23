@@ -408,9 +408,9 @@ var FileWidget = DragAndDropWidget.extend({
   render: function() {
     var self = this;
     this.imageHolder = new FlowPanel();
-    this.imageLabel = new Label("Drop image here!");
-    this.imageNameL = new Label("No file choosen...");
-    this.imageSizeL = new Label("---");
+    this.imageLabel = new Text("Drop image here!");
+    this.imageNameL = new Text("No file choosen...");
+    this.imageSizeL = new Text("---");
     this.fileB = new FileBox();
     this.fileB.addChangeListener(function(widget, e) {
       e.stopPropagation();
@@ -555,7 +555,7 @@ var LoginView = FlowPanel.extend({
 		var headerL = new Header2("Admin Tool");
 		var confirmB = new GradientButton("Confirm");
 		var errorP = new FlowPanel();
-		var errorL = new Label("Your password or login name is incorrect. Please try again!", true);
+		var errorL = new Text("Your password or login name is incorrect. Please try again!", true);
 		var footer = new FlowPanel();
 		var grid = new Grid(3,2);
 		this.cube = new Cube();
@@ -679,8 +679,8 @@ var TopBar = FlowPanel.extend({
   },
   render: function() {
     var appname = window.location.pathname.slice(1);
-    var label = new Label("resia.com");
-    var label2 = new Label("ADMIN TOOL / " + appname.toUpperCase());
+    var label = new Text("OceanFront ");
+    var label2 = new Text("ADMIN TOOL / " + appname.toUpperCase());
 
     label.setStyleName("inline r20");
     label2.setStyleName("inline r20");

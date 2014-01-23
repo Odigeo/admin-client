@@ -88,8 +88,12 @@ body {
 
 #topConsole input[type="search"] {
 	width: 160px;
+	height: 30px;
 	margin: 0px 10px 0px 0px;
-	font-size: 18px;
+	font-size: 14px;
+	padding: 2px 5px 2px 5px;
+	border-radius: 10px;
+	border: 1px solid #ccc;
 }
 
 #topConsole h2 {
