@@ -968,16 +968,22 @@ var CreateBox = FlowPanel.extend({
 				data[inputs[i].name] = $(inputs[i]).val();
 			}
 			// Create
+			self.loader.show();
 			PAPI.create(data, function(res) {
 				console.log("Created User");
 				window.users.refresh();
-				form.clearErrors();
+				form.clearAll();
+				self.loader.hide();
 				self.hide();
+			},
+			function(res) {
+				// Failed
+				self.loader.hide();
 			});
 		});
 
 		grid.addOnCancel(function(form,event){
-			form.clearErrors();
+			form.clearAll();
 			self.onCancel();
 		});
 
@@ -1059,16 +1065,22 @@ var CreateBox = FlowPanel.extend({
 				data[inputs[i].name] = $(inputs[i]).val();
 			}
 			// Create
+			self.loader.show();
 			PAPI.create(data, function(res) {
 				console.log("Created Group");
 				window.groups.refresh();
-				form.clearErrors();
+				form.clearAll();
+				self.loader.hide();
 				self.hide();
+			},
+			function(res) {
+				// Failed
+				self.loader.hide();
 			});
 		});
 		
 		grid.addOnCancel(function(form,event){
-			form.clearErrors();
+			form.clearAll();
 			self.onCancel();
 		});
 
@@ -1141,16 +1153,22 @@ var CreateBox = FlowPanel.extend({
 				data[inputs[i].name] = $(inputs[i]).val();
 			}
 			// Create
+			self.loader.show();
 			PAPI.create(data, function(res) {
 				console.log("Created Role");
 				window.roles.refresh();
-				form.clearErrors();
+				form.clearAll();
+				self.loader.hide();
 				self.hide();
+			},
+			function(res) {
+				// Failed
+				self.loader.hide();
 			});
 		});
 		
 		grid.addOnCancel(function(form,event){
-			form.clearErrors();
+			form.clearAll();
 			self.onCancel();
 		});
 
@@ -1223,16 +1241,22 @@ var CreateBox = FlowPanel.extend({
 				data[inputs[i].name] = $(inputs[i]).val();
 			}
 			// Create
+			self.loader.show();
 			PAPI.create(data, function(res) {
 				console.log("Created Right");
 				window.rights.refresh();
-				form.clearErrors();
+				form.clearAll();
+				self.loader.hide();
 				self.hide();
+			},
+			function(res) {
+				// Failed
+				self.loader.hide();
 			});
 		});
 		
 		grid.addOnCancel(function(form,event){
-			form.clearErrors();
+			form.clearAll();
 			self.onCancel();
 		});
 
@@ -1295,6 +1319,7 @@ var CreateBox = FlowPanel.extend({
 		var closeB = new CloseButton(function() {
 			self.hide();
 		});
+		this.loader = new WidgetLoader();
 
 		fp.setStyleName("popup-box");
 		closeB.setStyleName("popup-box-close-button");
@@ -1307,6 +1332,7 @@ var CreateBox = FlowPanel.extend({
 		this.mainFlow.showWidget(0);
 		fp.add(closeB);
 		fp.add(this.mainFlow);
+		this.add(this.loader);
 		this.add(fp);
 	}
 });
