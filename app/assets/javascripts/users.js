@@ -1,6 +1,7 @@
 var TopConsole = FlowPanel.extend({
 	init: function() {
 		this._super();
+		this.loader = new WidgetLoader();
 		this.render();
 		this.items = [];
 		this.setId("top-console");
@@ -116,10 +117,12 @@ var TopConsole = FlowPanel.extend({
 				var value_name = $(event.target).attr('name');
 				var data = self.currentSelectedItem.data;
 				data[value_name] = new_value;
+				self.loader.show();
 				PAPI.save(self.currentSelectedItem.getLink("self"), data, function(res) {
 					// Just save the data in current object rather than instantiate a new one, because then we would loose reference pointers etc
 					var type = self.currentSelectedItem.getType();
 					self.currentSelectedItem.data = res[type];
+					self.loader.hide();
 				});
 			}
 		});
@@ -285,6 +288,7 @@ var TopConsole = FlowPanel.extend({
 
 		// Cleanup
 		this.selectedItemHolder.clear();
+		this.selectedItemHolder.add(this.loader);
 		this.items = [];
 		this.selectedItemHolder.add(this.render_item(itemWidget));
 		this.clearContainer();
