@@ -661,12 +661,12 @@ var Cube = Widget.extend({
 	render: function() {
 		return html.div({'id':'cube-holder'},
 				html.div({'id':'cube'},
-					html.div({'class':'cube-side cube-top'}, '✿'),
-					html.div({'class':'cube-side cube-bottom'}, '✿'),
-					html.div({'class':'cube-side cube-front'}, '✿'),
-					html.div({'class':'cube-side cube-back'}, '✿'),
-					html.div({'class':'cube-side cube-left'}, '❀'),
-					html.div({'class':'cube-side cube-right'}, '❀')
+					html.div({'class':'cube-side cube-top'}, 'ۻ'),
+					html.div({'class':'cube-side cube-bottom'}, 'ת'),
+					html.div({'class':'cube-side cube-front'}, 'ऎ'),
+					html.div({'class':'cube-side cube-back'}, 'S'),
+					html.div({'class':'cube-side cube-left'}, 'ਈ'),
+					html.div({'class':'cube-side cube-right'}, 'ઔ')
 					));
 	}
 });
@@ -681,11 +681,20 @@ var TopBar = FlowPanel.extend({
     var appname = window.location.pathname.slice(1);
     var label = new Text("OceanFront ");
     var label2 = new Text("ADMIN TOOL / " + appname.toUpperCase());
+    var logoutB = new Button("Logout", function(e){
+      console.log("click");
+      // Erase login cookie
+      $.cookie('user-login', null, {'expires':null, 'path': '/'});
+      // Go to LoginView
+      mainFlow.fadeToWidget(0);
+    });
 
     label.setStyleName("inline r20");
     label2.setStyleName("inline r20");
+    logoutB.setId("topBar-logout-button");
 
     this.add(label);
     this.add(label2);
+    this.add(logoutB);
   }
 });

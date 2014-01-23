@@ -59,6 +59,22 @@ textarea {
 	z-index: 5000;
 }
 
+#topBar-logout-button {
+	float: right;
+	margin: -5px 0px 0px 0px;
+	background-color: rgba(255,255,255,0.0);
+	border: 1px solid #ccc;
+	border-radius: 5px;
+}
+
+#topBar-logout-button:hover {
+	background-color: rgba(155,155,155,0.3);
+}
+
+#topBar-logout-button:active {
+	background-color: rgba(155,155,155,0.5);
+}
+
 .fileWidget {
 	width: 200px;
 	padding: 10px;
@@ -223,6 +239,12 @@ textarea {
 	-webkit-transform-style: preserve-3d;
 }
 
+.cube-top {		-webkit-transform: rotateX(90deg) translateZ(25px); background-color: #FFDFCB;}
+.cube-bottom {	-webkit-transform: rotateX(-90deg) translateZ(25px) rotate(180deg); background-color: #FFFCCB;}
+.cube-front {	-webkit-transform: translateZ(25px); background-color: #B19FC4;}
+.cube-back {	-webkit-transform: rotateY(180deg) translateZ(25px); background-color: #98BEB6;}
+.cube-left {	-webkit-transform: rotateY(-90deg) translateZ(25px); background-color: #94BAB6;}
+.cube-right {	-webkit-transform: rotateY(90deg) translateZ(25px); background-color: #B2DCB0;}
 
 /* BonBon Buttons */
 
@@ -850,14 +872,6 @@ textarea {
 	background: -moz-linear-gradient(top,  #f171ab,  #feb1d3);
 	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#f171ab', endColorstr='#feb1d3');
 }
-
-
-.cube-top {		-webkit-transform: rotateX(90deg) translateZ(25px); background-color: #7FDD7F;}
-.cube-bottom {	-webkit-transform: rotateX(-90deg) translateZ(25px) rotate(180deg); background-color: #F48C8C;}
-.cube-front {	-webkit-transform: translateZ(25px); background-color: #E9A465;}
-.cube-back {	-webkit-transform: rotateY(180deg) translateZ(25px); background-color: #DA7DB8;}
-.cube-left {	-webkit-transform: rotateY(-90deg) translateZ(25px); background-color: #51BA51;}
-.cube-right {	-webkit-transform: rotateY(90deg) translateZ(25px); background-color: #E9D465;}
 
 .cms-card-animation {
 	-webkit-transform: scale(0.0);
