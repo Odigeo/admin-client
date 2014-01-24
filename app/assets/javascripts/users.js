@@ -110,7 +110,18 @@ var TopConsole = FlowPanel.extend({
 			if(event.type === 'mouseover' && name === 'created_at') {
 				// Implement fetching of creator link and show it in hover popup next to mouse
 
-				//console.log(self.currentSelectedItem.getLink("creator"));
+				// Show CreatorPopup if it's not currently showing (avoiding super spam)
+				if(!window.creatorPopup.isShowing) {
+					PAPI.get(self.currentSelectedItem.getLink("creator").replace("https", "http"), function(res) {
+						// Success
+						window.creatorPopup.setUser(res["api_user"]);
+					},
+					function(res) {
+						// Fail
+						if(console) console.log("Failed to get ApiUser for creator");
+					});
+				}
+				
 			} else if(event.type === "blur" && event.target.nodeName == "INPUT") {
 				// Save object because possible new data from user
 				var new_value = $(event.target).val();
@@ -1401,6 +1412,33 @@ var UsersView = FlowPanel.extend({
 	}
 });
 
+var CreatorPopup = FlowPanel.extend({
+	init: function() {
+		// Shows creator User on mouse hover of selected items creator-datetime
+		this._super();
+		var self = this;
+		this.isShowing = false;
+		this.setId("creatorPopup");
+		$(document).on('mousemove', function(e){
+		    $(self.getElement()).css({
+		       left:  e.pageX,
+		       top:   e.pageY - 200
+		    });
+		});
+	},
+	setUser: function(user) {
+		this.isShowing = true;
+		var self = this;
+		this.add(new UserItem(user));
+		setTimeout(function() {self.clearAll();}, 1000);
+	},
+	clearAll: function() {
+		this.clear();
+		//$(document).unbind('mousemove');
+		this.isShowing = false;
+	}
+});
+
 $(document).ready(function() {
 	var root = new RootPanel("bootstrap");
 	var wrapper = new FlowPanel();
@@ -1412,14 +1450,17 @@ $(document).ready(function() {
 
 	var fp = new UsersView();
 	var createBox = new CreateBox();
+	var creatorPopup = new CreatorPopup();
 	var login = new LoginView();
 	window.createBox = createBox;
+	window.creatorPopup = creatorPopup;
 
 	mainFlow.add(login);
 	mainFlow.add(fp);
 	mainFlow.showWidget(0);
 
 	wrapper.add(mainFlow);
+	root.add(creatorPopup);
 	root.add(wrapper);
 	root.add(createBox);
 

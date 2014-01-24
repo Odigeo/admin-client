@@ -321,8 +321,12 @@ html {
 	border: 2px inset;
 }
 
-#users-world-map-view {
-
+#creatorPopup {
+	/*width: 150px;
+	height: 100px;*/
+	position: absolute;
+	display: block;
+	z-index: 10000;
 }
 
 ::-webkit-validation-bubble {
