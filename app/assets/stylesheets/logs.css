@@ -56,8 +56,10 @@ body {
 	padding: 10px 5px 10px 5px;
 
 	text-align: left;
+	white-space: pre;
+	word-wrap: normal;
 
-	overflow-x: hidden;
+	overflow-x: scroll;
 	overflow-y: scroll;
 
 	font: 11px Monospace;

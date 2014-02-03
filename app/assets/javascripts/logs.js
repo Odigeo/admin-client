@@ -150,7 +150,7 @@ var RowItem = FocusWidget.extend({
 			// Assumes JSON object, should validate more!
 			this.data = data;
 		}
-		this.service_name_tab_length = 6;
+		this.service_name_tab_length = 2;
 		this._super(this.render());
 	},
 	getMsg: function() {
@@ -210,7 +210,8 @@ var RowItem = FocusWidget.extend({
 		}
 		// Make it ISO string with the time offset and remove T and Z character that indicate time is in UTC (we form it in local time)
 		var datestring = new Date(dateobj.valueOf() - dateobj.getTimezoneOffset()*60*1000).toISOString().replace("T", " ").replace("Z", "");
-		return this.getService() + tab_string + datestring + "  " + level + "\t" + this.getMsg() + "\n";
+		var row = this.getService() + tab_string + datestring + "  " + level + "\t" + this.getMsg() + "\n";
+		return row;
 	},
 	render: function() {
 		return html.div({});
@@ -251,7 +252,9 @@ var LogPanel = FlowPanel.extend({
 			// Entries as in the log_excerpt object v1
 			var entries = this.log.entries;
 			if(console) console.log("Setting new log with number of rows: " + entries.length);
-			for(var i=0;i<entries.length;i++) {
+			// Loop reverse over array of entries because they are in decending order of datetime
+			for(var i=(entries.length-1);i>=0;i--) {
+				// Create RowItem objects for each entry and add them to the array holder
 				this.rows.push(new RowItem(entries[i]));
 			}
 			// Render the new rows
