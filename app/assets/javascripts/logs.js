@@ -147,8 +147,10 @@ var RowItem = FocusWidget.extend({
 		if(typeof data === "string") {
 			this.data = JSON.parse(data);
 		} else {
+			// Assumes JSON object, should validate more!
 			this.data = data;
 		}
+		this.service_name_tab_length = 6;
 		this._super(this.render());
 	},
 	getMsg: function() {
@@ -198,9 +200,17 @@ var RowItem = FocusWidget.extend({
 		} else {
 			level = "UKNOWN";
 		}
+		// Adjust the number of tabs inserted after Service name depending on its length. 1 tab is 8 characters long in JavaScript strings
+		var tabs = Math.floor((this.getService().length / 8));
+		var final_tabs = this.service_name_tab_length - tabs;
+		final_tabs = (final_tabs < 0) ? 0 : final_tabs; // Make sure we don't have negative final_tabs for very long Service names.
+		var tab_string = "";
+		for(var i=0;i<final_tabs;i++) {
+			tab_string += "\t";
+		}
 		// Make it ISO string with the time offset and remove T and Z character that indicate time is in UTC (we form it in local time)
 		var datestring = new Date(dateobj.valueOf() - dateobj.getTimezoneOffset()*60*1000).toISOString().replace("T", " ").replace("Z", "");
-		return this.getService() + "\t" + datestring + "  " + level + "\t" + this.getMsg() + "\n";
+		return this.getService() + tab_string + datestring + "  " + level + "\t" + this.getMsg() + "\n";
 	},
 	render: function() {
 		return html.div({});
