@@ -19,6 +19,7 @@ group :test, :development do
   gem "watir-webdriver-rails"
   gem "ffi", "= 1.9.0"
   gem "factory_girl_rails", "~> 4.0"
+  gem "test-unit", ">= 2.5.5"
 end
 
 gem 'uglifier', '>= 1.3.0'
