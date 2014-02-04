@@ -3,6 +3,7 @@ ENV["RAILS_ENV"] ||= 'development'
 require File.expand_path("../../config/environment", __FILE__)
 require 'rspec/rails'
 require 'rspec/autorun'
+require 'watir-webdriver-rails'
 
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories.
@@ -40,7 +41,7 @@ end
 
 # Set up the host and port of the client app being tested 
 client_host = ENV['CLIENT_HOST'] || "http://localhost"
-client_port = ENV['CLIENT_PORT'] || 3000 
+client_port = ENV['CLIENT_PORT'] || 3000
 
 # Set up the user and password of the user used to log in to perform the tests
 TEST_API_USER = ENV['TEST_API_USER'] || TEST_API_USER

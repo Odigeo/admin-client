@@ -1,13 +1,13 @@
 require 'spec_helper'
 
-describe "cms" do
+describe "users" do
 
   after do
     teardown_browser(@b)
   end
   
   def do_login
-    @b = setup_browser URL+"/cms"
+    @b = setup_browser URL+"/users"
     assert(@b.text_field(:id, "login-input"))
       @b.text_field(:id, "login-input").wait_until_present
       @b.text_field(:id, "login-input").set(TEST_API_USER)
@@ -17,6 +17,15 @@ describe "cms" do
       # Wait until we can see input elements for search
       @b.text_field(:id, "app").wait_until_present
     rescue => e
+  end
+
+  it "should be able to filter on god user" do
+    do_login
+    @b.div(:id => "USERS-container").div(:class => "container-widget-header").text_field(:placeholder => "Search").wait_until_present
+    @b.div(:id => "USERS-container").div(:class => "container-widget-header").text_field(:placeholder => "Search").set("god");
+    @b.div(:id => "USERS-container").div(:class => "bucket-container").div(:class => "box-item").div(:class => "box-item-label").text.should == "god"
+    #@b.element(:xpath => "//div[div = 'god']").wait_until_present
+    #@b.element(:xpath => "//div[div = 'god']").click
   end
 
   # it "should be able to search for a application" do

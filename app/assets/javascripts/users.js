@@ -729,6 +729,10 @@ var ContainerWidget = DragAndDropWidget.extend({
 			widget.removeFromParent();
 		}
 	},
+	addItems: function() {
+		// This method must be overridden upon inheritence, since refresh() need it
+		if(console) console.warn("addItems in ContainerWidget is not overridden!!! Fix this!");
+	},
 	removeItem: function(widget) {
 		// Remove item from complete list
 		this.items.remove(widget);
@@ -755,7 +759,6 @@ var ContainerWidget = DragAndDropWidget.extend({
 var Users = ContainerWidget.extend({
 	init: function() {
 		this._super("USERS");
-		this.addItems();
 
 		this.setStyleName("bucket");
 	},
@@ -787,7 +790,6 @@ var Users = ContainerWidget.extend({
 var Groups = ContainerWidget.extend({
 	init: function() {
 		this._super("GROUPS");
-		this.addItems();
 
 		this.setStyleName("bucket");
 	},
@@ -819,7 +821,6 @@ var Groups = ContainerWidget.extend({
 var Roles = ContainerWidget.extend({
 	init: function() {
 		this._super("ROLES");
-		this.addItems();
 
 		this.setStyleName("bucket");
 	},
@@ -851,7 +852,6 @@ var Roles = ContainerWidget.extend({
 var Rights = ContainerWidget.extend({
 	init: function() {
 		this._super("RIGHTS");
-		this.addItems();
 
 		this.setStyleName("bucket");
 	},
@@ -1361,6 +1361,10 @@ var UsersView = FlowPanel.extend({
 	setVisible: function(visible) {
 		if(visible) {
 			document.title = "Users and rights";
+			window.users.refresh();
+			window.groups.refresh();
+			window.roles.refresh();
+			window.rights.refresh();
 		}
 		this._super(visible);
 	},
