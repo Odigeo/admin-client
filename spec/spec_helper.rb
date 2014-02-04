@@ -5,6 +5,17 @@ require 'rspec/rails'
 require 'rspec/autorun'
 require 'watir-webdriver-rails'
 
+
+# Custom drag_and_drop method for Watir
+module Watir
+  class Element
+    def drag_and_drop_on(other)
+      assert_exists
+      driver.action.drag_and_drop(@element, other.wd).perform
+    end
+  end
+end
+
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories.
 Dir[Rails.root.join("spec/support/**/*.rb")].each {|f| require f}

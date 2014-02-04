@@ -14,69 +14,52 @@ describe "users" do
       @b.text_field(:id, "password-input").set(TEST_API_PASSWORD)
       #@b.send_keys :enter
       @b.div(:id, "login-confirm-button").click
-      # Wait until we can see input elements for search
-      @b.text_field(:id, "app").wait_until_present
     rescue => e
   end
 
-  it "should be able to filter on god user" do
+  it "should be able to filter on a api_user" do
     do_login
-    @b.div(:id => "USERS-container").div(:class => "container-widget-header").text_field(:placeholder => "Search").wait_until_present
-    @b.div(:id => "USERS-container").div(:class => "container-widget-header").text_field(:placeholder => "Search").set("god");
-    @b.div(:id => "USERS-container").div(:class => "bucket-container").div(:class => "box-item").div(:class => "box-item-label").text.should == "god"
-    #@b.element(:xpath => "//div[div = 'god']").wait_until_present
-    #@b.element(:xpath => "//div[div = 'god']").click
+    @b.div(:id => "USERS-container").div(:class => "box-item user-item").wait_until_present
+    @b.div(:id => "USERS-container").text_field(:placeholder => "Search").set("god")
+    @b.div(:id => "USERS-container").div(:class => "box-item-label").text.should == "god"
   end
 
-  # it "should be able to search for a application" do
-  #   do_login
-  #   @b.text_field(:id, "app").set("test")
-  #   @b.send_keys :enter
-  #   @b.div(:class, "cms-card-panel").wait_until_present
-  #   @b.div(:class, "cms-card-panel").div(:class, "closeButton").exists?
-  #     @b.div(:class, "cms-card-panel").div(:class, "closeButton").click
-  # end
+  it "should be able to click on a api_user" do
+    do_login
+    @b.div(:id => "USERS-container").div(:class => "box-item user-item").wait_until_present
+    @b.div(:id => "USERS-container").text_field(:placeholder => "Search").set("god")
+    @b.div(:id => "USERS-container").div(:class => "box-item-label").click
+    @b.text_field(:name => "username").wait_until_present
+    @b.text_field(:name => "username").value.should == "god"
+  end
 
-  # it "should be able to search and read a text object" do
-  #   do_login
-  #   @b.text_field(:id, "app").set("test")
-  #   @b.text_field(:id, "context").set("testWidget")
-  #   @b.text_field(:id, "name").set("test1")
-  #   @b.send_keys :enter
-  #   @b.div(:class, "cms-card-panel").wait_until_present
-  #   @b.textarea(:class => "cms-object-textarea", :index => 1).value.should == "This is a test for test agent, RSpec!"
-  # end
+  it "should be possible to open create popup" do
+    do_login
+    @b.div(:id => "USERS-container").div(:class => "box-item user-item").wait_until_present
+    @b.div(:id => "USERS-container").div(:class => "create-boxitem-button").click
+    @b.div(:class => "popup-box").h2().wait_until_present
+    @b.div(:class => "popup-box").h2().text.should == "Create new user"
+  end
 
-  # it "should be able to search and read a link object" do
-  #   do_login
-  #   @b.text_field(:id, "app").set("test")
-  #   @b.text_field(:id, "context").set("testWidget")
-  #   @b.text_field(:id, "name").set("test2")
-  #   @b.send_keys :enter
-  #   @b.div(:class, "cms-card-panel").wait_until_present
-  #   @b.div(:class => "cms-object", :index => 1).text_field(:placeholder, "Text").value.should == "blahonga link"
-  #   @b.div(:class => "cms-object", :index => 1).text_field(:placeholder, "Link").value.should == "#!test=hej"
-  # end
+  it "should be able to show connections for a api_user" do
+    do_login
+    @b.div(:id => "USERS-container").div(:class => "box-item user-item").wait_until_present
+    @b.div(:id => "USERS-container").text_field(:placeholder => "Search").set("god")
+    @b.div(:id => "USERS-container").div(:class => "box-item-label").click
+    @b.div(:id => "to-container").div(:class => "role-item").wait_until_present
+    @b.div(:id => "to-container").div(:class => "role-item").div(:class => "box-item-label").exist?
+  end
 
-  # it "should be able to search and read a markdown object" do
-  #   do_login
-  #   @b.text_field(:id, "app").set("test")
-  #   @b.text_field(:id, "context").set("testWidget")
-  #   @b.text_field(:id, "name").set("test3")
-  #   @b.send_keys :enter
-  #   @b.div(:class, "cms-card-panel").wait_until_present
-  #   @b.textarea(:class => "cms-object-textarea", :index => 1).value.should == "# Header1"
-  # end
+  it "should be able to drag a role item and connect to a api_user item" do
+    do_login
+    @b.div(:id => "USERS-container").div(:class => "box-item user-item").wait_until_present
+    @b.div(:id => "USERS-container").text_field(:placeholder => "Search").set("admin_client_testuser")
+    @b.div(:id => "USERS-container").div(:class => "box-item-label").click
+    @b.div(:id => "to-container").div(:class => "role-item").wait_until_present
 
-  # it "should be able to search and read a image object" do
-  #   do_login
-  #   @b.text_field(:id, "app").set("test")
-  #   @b.text_field(:id, "context").set("testWidget")
-  #   @b.text_field(:id, "name").set("test4")
-  #   @b.send_keys :enter
-  #   @b.div(:class, "cms-card-panel").wait_until_present
-  #   @b.div(:class => "cms-object", :index => 1).img(:class, "fileWidgetImage").exists?
-  #   @b.div(:class => "cms-object", :index => 1).text_field(:placeholder, "Image tags").value.should == "blond, woman"
-  # end
+    @b.div(:id => "ROLES-container").div(:class => "box-item role-item").wait_until_present
+    @b.div(:id => "ROLES-container").text_field(:placeholder => "Search").set("AdminClientLoggedIn")
+    @b.div(:id => "ROLES-container").div(:class => "box-item role-item").drag_and_drop_on(@b.div(:id => "to-container"))
+  end
 
 end
