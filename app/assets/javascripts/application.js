@@ -11,9 +11,9 @@
 // GO AFTER THE REQUIRES BELOW.
 //
 // require_tree .
-//= require tools/jquery-1.7.1
-//= require tools/jquery.cookie
-//= require tools/jquery.base64.js
+// require tools/jquery-1.7.1
+// require tools/jquery.cookie
+// require tools/jquery.base64.js
 // require ../oceanfront/oceanfront
-//= require common
-//= require @js_app_name 
+// require common
+// require @js_app_name 
