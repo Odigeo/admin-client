@@ -49,28 +49,32 @@ var PAPI = PAPIBase.extend({
     }
   },
   beforeApiCall: function(link, data, method, success_callback, error_callback, headers) {
-      
-      // detect IE CORS transport
+    
     if($.browser.msie) {
+
+      // Make sure we handle query correct depending if it exist or not
+      if(link.indexOf('?') == -1) {
+        link += '?';
+      } else {
+        link += '&';
+      }
+      // Add special params for Ocean back-end handling IE in varnish
       if(method === "PUT") {
-        link += '?_method=PUT';
-        link += '&_x-api-token=' + config.INITIAL_API_TOKEN;
+        link += '_method=PUT&_x-api-token=' + config.INITIAL_API_TOKEN;
         method = "POST";
       } else if(method === "DELETE") {
-        link += '?_method=DELETE';
-        link += '&_x-api-token=' + config.INITIAL_API_TOKEN;
+        link += '_method=DELETE&_x-api-token=' + config.INITIAL_API_TOKEN;
         method = "POST";
       } else if(method === "POST") {
-        link += '?_method=POST';
-        link += '&_x-api-token=' + config.INITIAL_API_TOKEN;
+        link += '_method=POST&_x-api-token=' + config.INITIAL_API_TOKEN;
         method = "POST";
       } else if(method === "GET") {
-        link += '?_method=GET';
-        link += '&_x-api-token=' + config.INITIAL_API_TOKEN;
+        link += '_method=GET&_x-api-token=' + config.INITIAL_API_TOKEN;
         method = "GET";
       }
     }
     
+    // Make the actual API call in PAPIBase
     this.apiCall(link, data, method, success_callback, error_callback, headers);
   },
   pre_error: function(xhr, textStatus, errorThrown) {
