@@ -32,17 +32,8 @@ var TopConsole = FlowPanel.extend({
 		var realnameL = new Text("Real name");
 		var emailL = new Text("Email");
 		var usernameI = new TextBox();
-		usernameI.setAttributes({
-			'name':'username'
-		});
 		var realnameI = new TextBox();
-		realnameI.setAttributes({
-			'name':'real_name'
-		});
 		var emailI = new TextBox();
-		emailI.setAttributes({
-			'name':'email'
-		});
 
 		var deleteB = new BonBonButton("Delete", function(){
 			PAPI.delete(self.currentSelectedItem.getLink("self"), function(res) {
@@ -60,14 +51,17 @@ var TopConsole = FlowPanel.extend({
 			});
 		}, "✗");
 
-		deleteB.setId("top-console-delete-button");
-		deleteB.setStyleName("bbPink relief-shadow");
-		usernameI.setText(itemWidget.data.username || "");
-		usernameI.setStyle("font-weight", "bold");
-		realnameI.setText(itemWidget.data.real_name || "");
-		emailI.setText(itemWidget.data.email || "");
-		nameI.setText(itemWidget.data.name || "");
-		nameI.setStyle("font-weight", "bold");
+		deleteB.setId("top-console-delete-button").setStyleName("bbPink relief-shadow");
+		usernameI.setText(itemWidget.data.username || "").setStyle("font-weight", "bold").setAttributes({
+			'name':'username'
+		});
+		realnameI.setText(itemWidget.data.real_name || "").setAttributes({
+			'name':'real_name'
+		});
+		emailI.setText(itemWidget.data.email || "").setAttributes({
+			'name':'email'
+		});
+		nameI.setText(itemWidget.data.name || "").setStyle("font-weight", "bold");
 		descriptionI.setText(itemWidget.data.description || "");
 
 		nameL.setStyleName("align-right");
