@@ -60,6 +60,14 @@ var PAPI = PAPIBase.extend({
         link += '?_method=DELETE';
         link += '&_x-api-token=' + config.INITIAL_API_TOKEN;
         method = "POST";
+      } else if(method === "POST") {
+        link += '?_method=POST';
+        link += '&_x-api-token=' + config.INITIAL_API_TOKEN;
+        method = "POST";
+      } else if(method === "GET") {
+        link += '?_method=GET';
+        link += '&_x-api-token=' + config.INITIAL_API_TOKEN;
+        method = "GET";
       }
     }
     
