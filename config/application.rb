@@ -43,9 +43,9 @@ module AdminClient
     # config.active_record.schema_format = :sql
 
     # Enable the asset pipeline
-    config.assets.enabled = true
-    config.assets.paths << "#{Rails.root}/app/assets/oceanfront"
-    config.assets.js_compressor = :uglifier
+    config.assets.enabled = false
+    #config.assets.paths << "#{Rails.root}/app/assets/oceanfront"
+    #config.assets.js_compressor = :uglifier
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'

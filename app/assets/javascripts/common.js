@@ -2,6 +2,86 @@ var PAPI = PAPIBase.extend({
   init: function() {
     this._super();
   },
+  api_domain: function() {
+    return config.OCEAN_API_URL;
+  },
+  api_version: function(key) {
+    switch(key) {
+      case "texts_version": 
+        return config.API_VERSIONS.texts || config.API_VERSIONS._default
+        break;
+      case "media_version": 
+        return config.API_VERSIONS.media || config.API_VERSIONS._default
+        break;
+      default: 
+        return config.API_VERSIONS._default;
+    }
+  },
+  getHeaders: function(custom_headers) {
+    // Use custom token (user login) first, otherwise clients initial token
+    if(!custom_headers) {
+      var token = "";
+      if($.cookie("user-login")) {
+        if(typeof $.cookie("user-login") === "string") {
+          token = JSON.parse($.cookie("user-login")).token;
+        } else if(typeof $.cookie("user-login") === "object") {
+          token = $.cookie("user-login").token;
+        }
+      } else {
+        token = config.INITIAL_API_TOKEN;
+        if(console) console.warn("Used applications auth token!!");
+      }
+
+      // Add extra headers specified in data hash
+      return {"Accept": "application/json",
+                "X-API-Token": token
+                };
+    } else {
+      var headers_list = {"Accept": "application/json"};
+      if(custom_headers && typeof custom_headers === "object") {
+        for(var obj in custom_headers) {
+          headers_list[obj] = custom_headers[obj];
+        }
+        return headers_list;
+      } else {
+        if(console) console.warn("custom_headers in PAPI seem like not a correct object!!");
+      }
+    }
+  },
+  beforeApiCall: function(link, data, method, success_callback, error_callback, headers) {
+      
+      // detect IE CORS transport
+    if($.browser.msie) {
+      if(method === "PUT") {
+        link += '?_method=PUT';
+        link += '&_x-api-token=' + config.INITIAL_API_TOKEN;
+        method = "POST";
+      } else if(method === "DELETE") {
+        link += '?_method=DELETE';
+        link += '&_x-api-token=' + config.INITIAL_API_TOKEN;
+        method = "POST";
+      }
+    }
+    
+    this.apiCall(link, data, method, success_callback, error_callback, headers);
+  },
+  pre_error: function(xhr, textStatus, errorThrown) {
+    // Override to get custom response handling
+    if(console) console.log(xhr.status + " " + xhr.statusText);
+    if(console) console.log(xhr);
+    //if (console) console.log(textStatus);
+    //if (console) console.log(errorThrown);
+    if(xhr.status == 419) {
+      // Need to refresh authentication token
+
+      // Clear cookie first since LoginView check if it's valid
+      $.cookie("user-login", null, "/");
+      if(window.mainFlow) {
+        // Login view
+        window.mainFlow.fadeToWidget(0);
+      }
+    }
+  },
   collect: function(link, data, method, success_callback, error_callback) {
     var urlCms = this.api_domain() + '/' + this.api_version("texts_version") + '/texts' + link;
     var urlMedia = this.api_domain() + '/' + this.api_version("media_version") + '/media' + link;
@@ -18,8 +98,8 @@ var PAPI = PAPIBase.extend({
       }
     };
 
-    PAPI.apiCall(urlCms, data, method, collector, error_callback);
-    PAPI.apiCall(urlMedia, data, method, collector, error_callback);
+    this.beforeApiCall(urlCms, data, method, collector, error_callback, this.getHeaders());
+    this.beforeApiCall(urlMedia, data, method, collector, error_callback, this.getHeaders());
   },
   construct_link: function(data_or_link, iterateObject) {
     var link = "";
@@ -87,11 +167,10 @@ var PAPI = PAPIBase.extend({
     
     var version = this.api_version("authentications_version");
     var url = this.api_domain() + "/" + version + "/authentications";
-    data2.headers = {
-      'X-API-Authenticate': data2.credentials
-    };
 
-    PAPI.apiCall(url, data2, 'POST', success_callback, error_callback);
+    this.beforeApiCall(url, data2, 'POST', success_callback, error_callback, this.getHeaders({
+      'X-API-Authenticate': data2.credentials
+    }));
   },
   getKeys: function(data, success) {
     var url = "";
@@ -109,15 +188,31 @@ var PAPI = PAPIBase.extend({
   },
   getLogs: function(fromdate, todate, success, error) {
     var link = this.api_domain() + "/" + this.api_version("log_excerpts_version") + "/log_excerpts/" + fromdate + "/" + todate;
-    this.apiCall(link, null, "GET", success, error);
+    this.beforeApiCall(link, null, "GET", success, error, this.getHeaders());
   },
   connect: function(link1, link2, success, error) {
     link1 += '?href=' + encodeURI(link2);
-    this.apiCall(link1, {}, "PUT", success, error);
+    this.beforeApiCall(link1, {}, "PUT", success, error, this.getHeaders());
   },
   disconnect: function(link1, link2, success, error) {
     link1 += '?href=' + encodeURI(link2);
-    this.apiCall(link1, {}, "DELETE", success, error);
+    this.beforeApiCall(link1, {}, "DELETE", success, error, this.getHeaders());
+  },
+  _save: function(link, data, success, error) {
+    this.beforeApiCall(link, data, "PUT", success, error, this.getHeaders());
+  },
+  _delete: function(link, success, error) {
+    this.beforeApiCall(link, null, "DELETE", success, error, this.getHeaders());
+  },
+  _get: function(data_or_link, success, error) {
+    var link = "";
+    link = this.construct_link(data_or_link, true);
+    this.beforeApiCall(link, null, "GET", success, error, this.getHeaders());
+  },
+  _create: function(data, success, error) {
+    var link = "";
+    link = this.construct_link(data, false);
+    this.beforeApiCall(link, data, "POST", success, error, this.getHeaders());
   }
 });
 
