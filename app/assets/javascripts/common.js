@@ -48,7 +48,7 @@ var PAPI = PAPIBase.extend({
       }
     }
   },
-  beforeApiCall: function(link, data, method, success_callback, error_callback, headers) {
+  apiCall: function(link, data, method, success_callback, error_callback, headers) {
     
     if($.browser.msie) {
 
@@ -60,22 +60,26 @@ var PAPI = PAPIBase.extend({
       }
       // Add special params for Ocean back-end handling IE in varnish
       if(method === "PUT") {
-        link += '_method=PUT&_x-api-token=' + config.INITIAL_API_TOKEN;
+        link += '_method=PUT';
         method = "POST";
       } else if(method === "DELETE") {
-        link += '_method=DELETE&_x-api-token=' + config.INITIAL_API_TOKEN;
+        link += '_method=DELETE';
         method = "POST";
       } else if(method === "POST") {
-        link += '_method=POST&_x-api-token=' + config.INITIAL_API_TOKEN;
+        link += '_method=POST';
         method = "POST";
       } else if(method === "GET") {
-        link += '_method=GET&_x-api-token=' + config.INITIAL_API_TOKEN;
+        link += '_method=GET';
         method = "GET";
+      }
+      // Add headers as query params
+      for(var obj in headers) {
+        link += '&_' + obj + '=' + headers[obj];
       }
     }
     
     // Make the actual API call in PAPIBase
-    this.apiCall(link, data, method, success_callback, error_callback, headers);
+    this._super(link, data, method, success_callback, error_callback, headers);
   },
   pre_error: function(xhr, textStatus, errorThrown) {
     // Override to get custom response handling
@@ -110,8 +114,8 @@ var PAPI = PAPIBase.extend({
       }
     };
 
-    this.beforeApiCall(urlCms, data, method, collector, error_callback, this.getHeaders());
-    this.beforeApiCall(urlMedia, data, method, collector, error_callback, this.getHeaders());
+    this.apiCall(urlCms, data, method, collector, error_callback, this.getHeaders());
+    this.apiCall(urlMedia, data, method, collector, error_callback, this.getHeaders());
   },
   construct_link: function(data_or_link, iterateObject) {
     var link = "";
@@ -180,7 +184,7 @@ var PAPI = PAPIBase.extend({
     var version = this.api_version("authentications_version");
     var url = this.api_domain() + "/" + version + "/authentications";
 
-    this.beforeApiCall(url, data2, 'POST', success_callback, error_callback, this.getHeaders({
+    this.apiCall(url, data2, 'POST', success_callback, error_callback, this.getHeaders({
       'X-API-Authenticate': data2.credentials
     }));
   },
@@ -204,27 +208,27 @@ var PAPI = PAPIBase.extend({
   },
   connect: function(link1, link2, success, error) {
     link1 += '?href=' + encodeURI(link2);
-    this.beforeApiCall(link1, {}, "PUT", success, error, this.getHeaders());
+    this.apiCall(link1, {}, "PUT", success, error, this.getHeaders());
   },
   disconnect: function(link1, link2, success, error) {
     link1 += '?href=' + encodeURI(link2);
-    this.beforeApiCall(link1, {}, "DELETE", success, error, this.getHeaders());
+    this.apiCall(link1, {}, "DELETE", success, error, this.getHeaders());
   },
   _save: function(link, data, success, error) {
-    this.beforeApiCall(link, data, "PUT", success, error, this.getHeaders());
+    this.apiCall(link, data, "PUT", success, error, this.getHeaders());
   },
   _delete: function(link, success, error) {
-    this.beforeApiCall(link, null, "DELETE", success, error, this.getHeaders());
+    this.apiCall(link, null, "DELETE", success, error, this.getHeaders());
   },
   _get: function(data_or_link, success, error) {
     var link = "";
     link = this.construct_link(data_or_link, true);
-    this.beforeApiCall(link, null, "GET", success, error, this.getHeaders());
+    this.apiCall(link, null, "GET", success, error, this.getHeaders());
   },
   _create: function(data, success, error) {
     var link = "";
     link = this.construct_link(data, false);
-    this.beforeApiCall(link, data, "POST", success, error, this.getHeaders());
+    this.apiCall(link, data, "POST", success, error, this.getHeaders());
   }
 });
 
