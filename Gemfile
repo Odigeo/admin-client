@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem "rails", "~> 4.0"
-gem "ocean-rails", ">= 1.29.8"
+gem "ocean-rails", ">= 2.0.0"
 gem "ocean-dynamo", ">= 0.3.1"
 
 gem 'net-purge'          # For Varnish purges
