@@ -255,7 +255,7 @@ var FlipConsole = FlowPanel.extend({
 	      data.service = 'media';
 	    }
 
-		PAPI.create(data, function(res){
+		PAPI._create(data, function(res){
 			if(console) console.log("Successfully created a new post!");
 			if(console) console.log(data);
 			self.showSuccess("Successfully created post!!");
@@ -750,7 +750,7 @@ var CMSCardPanel = FlowPanel.extend({
 			}
 			
 			cmsobj.setNoText();
-			PAPI.save(self.translations[cmsobj.locale].links[0].href, data, function(res) {
+			PAPI._save(self.translations[cmsobj.locale].links[0].href, data, function(res) {
 				if (console) console.log("Successfully saved for locale: " + cmsobj.locale);
 				cmsobj.setSuccess();
 			}, function(res) {
@@ -784,7 +784,7 @@ var CMSCardPanel = FlowPanel.extend({
 			}
 
 			cmsobj.setNoText();
-			PAPI.create(data, function(res) {
+			PAPI._create(data, function(res) {
 				if (console) console.log("Successfully create new locale post!!");
 				cmsobj.setSuccess();
 				//Should update self.translations with the created locale and its data so a Save will occur on next onSave instead of Create
@@ -805,7 +805,7 @@ var CMSCardPanel = FlowPanel.extend({
 	onDelete: function(cmsobj, self) {
 		if(cmsobj.data[cmsobj.locale]) {
 			
-			PAPI.delete(self.translations.getHyperlink("self", cmsobj.locale).href, function(res) {
+			PAPI._delete(self.translations.getHyperlink("self", cmsobj.locale).href, function(res) {
 				if (console) console.log("Successfully DELETED locale!!");
 				cmsobj.setDeleted();
 				self.deleteCounter += 1;
@@ -1140,7 +1140,7 @@ $(document).ready(function() {
 	};
 
 
-	PAPI.save(link, data, function(res){
+	PAPI._save(link, data, function(res){
 		console.log(res);
 		console.log("Succeeded at PUT!!");
 	});

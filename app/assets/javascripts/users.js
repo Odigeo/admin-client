@@ -315,6 +315,7 @@ var TopConsole = FlowPanel.extend({
 		if(usersLink) {
 			number_of_calls++;
 			PAPI._get(usersLink, function(res) {
+				res = res._collection.resources;
 				if(typeof res === "object" && res["api_user"]) {
 					// Single object
 					self.addItem(new UserItem(res.api_user));
@@ -337,6 +338,7 @@ var TopConsole = FlowPanel.extend({
 		if(groupsLink) {
 			number_of_calls++;
 			PAPI._get(groupsLink, function(res) {
+				res = res._collection.resources;
 				if(typeof res === "object" && res["group"]) {
 					// Single object
 					self.addItem(new GroupItem(res.group));
@@ -359,6 +361,7 @@ var TopConsole = FlowPanel.extend({
 		if(rolesLink) {
 			number_of_calls++;
 			PAPI._get(rolesLink, function(res) {
+				res = res._collection.resources;
 				if(typeof res === "object" && res["role"]) {
 					// Single object
 					self.addItem(new RoleItem(res.role));
@@ -381,6 +384,7 @@ var TopConsole = FlowPanel.extend({
 		if(rightsLink) {
 			number_of_calls++;
 			PAPI._get(rightsLink, function(res) {
+				res = res._collection.resources;
 				if(typeof res === "object" && res["role"]) {
 					// Single object
 					self.addItem(new RightItem(res.right));
@@ -763,6 +767,7 @@ var Users = ContainerWidget.extend({
 		this.showLoader();
 		PAPI._get(data, function(res) {
 			// Success
+			res = res._collection.resources;
 			if(res[0]) {
 				if(res[0]["api_user"]) {
 					for(var i=0;i<res.length;i++) {
@@ -794,6 +799,7 @@ var Groups = ContainerWidget.extend({
 		self.showLoader();
 		PAPI._get(data, function(res) {
 			// Success
+			res = res._collection.resources;
 			if(res[0]) {
 				if(res[0]["group"]) {
 					for(var i=0;i<res.length;i++) {
@@ -825,6 +831,7 @@ var Roles = ContainerWidget.extend({
 		self.showLoader();
 		PAPI._get(data, function(res) {
 			// Success
+			res = res._collection.resources;
 			if(res[0]) {
 				if(res[0]["role"]) {
 					for(var i=0;i<res.length;i++) {
@@ -856,6 +863,7 @@ var Rights = ContainerWidget.extend({
 		self.showLoader();
 		PAPI._get(data, function(res) {
 			// Success
+			res = res._collection.resources;
 			if(res[0]) {
 				if(res[0]["right"]) {
 					for(var i=0;i<res.length;i++) {

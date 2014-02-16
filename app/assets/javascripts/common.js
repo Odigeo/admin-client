@@ -106,6 +106,7 @@ var PAPI = PAPIBase.extend({
     var result = [];
     var collector = function(res) {
       count++;
+      res = res._collection.resources;
       if(count === 1) {
         result = res;
       } else if(count === 2) {
@@ -204,7 +205,7 @@ var PAPI = PAPIBase.extend({
   },
   getLogs: function(fromdate, todate, success, error) {
     var link = this.api_domain() + "/" + this.api_version("log_excerpts_version") + "/log_excerpts/" + fromdate + "/" + todate;
-    this.beforeApiCall(link, null, "GET", success, error, this.getHeaders());
+    this.apiCall(link, null, "GET", success, error, this.getHeaders());
   },
   connect: function(link1, link2, success, error) {
     link1 += '?href=' + encodeURI(link2);
