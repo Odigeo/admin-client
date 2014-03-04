@@ -986,7 +986,7 @@ var CreateBox = FlowPanel.extend({
 			}
 			// Create
 			self.loader.show();
-			PAPI.create(data, function(res) {
+			PAPI._create(data, function(res) {
 				console.log("Created User");
 				window.users.refresh();
 				form.clearAll();
@@ -1083,7 +1083,7 @@ var CreateBox = FlowPanel.extend({
 			}
 			// Create
 			self.loader.show();
-			PAPI.create(data, function(res) {
+			PAPI._create(data, function(res) {
 				console.log("Created Group");
 				window.groups.refresh();
 				form.clearAll();
@@ -1171,7 +1171,7 @@ var CreateBox = FlowPanel.extend({
 			}
 			// Create
 			self.loader.show();
-			PAPI.create(data, function(res) {
+			PAPI._create(data, function(res) {
 				console.log("Created Role");
 				window.roles.refresh();
 				form.clearAll();
@@ -1259,7 +1259,7 @@ var CreateBox = FlowPanel.extend({
 			}
 			// Create
 			self.loader.show();
-			PAPI.create(data, function(res) {
+			PAPI._create(data, function(res) {
 				console.log("Created Right");
 				window.rights.refresh();
 				form.clearAll();
