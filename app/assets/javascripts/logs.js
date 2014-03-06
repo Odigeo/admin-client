@@ -154,7 +154,39 @@ var RowItem = FocusWidget.extend({
 		this._super(this.render());
 	},
 	getMsg: function() {
-		return this.data.msg;
+		if(this.data.msg) {
+			return this.data.msg;
+		} else {
+			return "";
+		}
+	},
+	getMethod: function() {
+		if(this.data.method) {
+			return this.data.method + " ";
+		} else {
+			return "";
+		}
+	},
+	getStatus: function() {
+		if(this.data.status) {
+			return this.data.status + " ";
+		} else {
+			return "";
+		}
+	},
+	getPath: function() {
+		if(this.data.path) {
+			return this.data.path + " ";
+		} else {
+			return "";
+		}
+	},
+	getRemoteIP: function() {
+		if(this.data.remote_ip) {
+			return this.data.remote_ip + " ";
+		} else {
+			return "";
+		}
 	},
 	getService: function() {
 		return this.data.service;
@@ -187,15 +219,15 @@ var RowItem = FocusWidget.extend({
 		// Renderer method for TextArea that display only rows of text
 		var dateobj = new Date(this.getTimeStamp());
 		var level = "";
-		if(level == 0) {
+		if(this.getLevel() == 0) {
 			level = "DEBUG";
-		} else if(level == 1) {
+		} else if(this.getLevel() == 1) {
 			level = "INFO";
-		} else if(level == 2) {
+		} else if(this.getLevel() == 2) {
 			level = "WARN";
-		} else if(level == 3) {
+		} else if(this.getLevel() == 3) {
 			level = "ERROR";
-		} else if(level == 4) {
+		} else if(this.getLevel() == 4) {
 			level = "FATAL";
 		} else {
 			level = "UKNOWN";
@@ -210,7 +242,7 @@ var RowItem = FocusWidget.extend({
 		}
 		// Make it ISO string with the time offset and remove T and Z character that indicate time is in UTC (we form it in local time)
 		var datestring = new Date(dateobj.valueOf() - dateobj.getTimezoneOffset()*60*1000).toISOString().replace("T", " ").replace("Z", "");
-		var row = this.getService() + tab_string + datestring + "  " + level + "\t" + this.getMsg() + "\n";
+		var row = this.getService() + tab_string + datestring + "  " + level + "\t" + this.getMethod() + this.getStatus() + this.getPath() + this.getRemoteIP() + this.getMsg() + "\n";
 		return row;
 	},
 	render: function() {
@@ -245,6 +277,7 @@ var LogPanel = FlowPanel.extend({
 	},
 	setNewLogResult: function(log) {
 		// Sets new raw Log result and render it
+		console.log(log);
 		if(log && log.log_excerpt) {
 			// Clear
 			this.clearLog();
