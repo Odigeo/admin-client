@@ -58,7 +58,7 @@ GEM
       ffi
     hike (1.2.3)
     i18n (0.6.9)
-    jbuilder (2.0.3)
+    jbuilder (2.0.4)
       activesupport (>= 3.0.0)
       multi_json (>= 1.2.0)
     json (1.8.1)
@@ -68,7 +68,7 @@ GEM
     mime-types (1.25.1)
     mini_portile (0.5.2)
     minitest (4.7.5)
-    multi_json (1.8.4)
+    multi_json (1.9.0)
     multipart-post (1.2.0)
     net-purge (0.1.0)
     nokogiri (1.6.1)
