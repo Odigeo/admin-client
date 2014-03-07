@@ -22,11 +22,12 @@ var PAPI = PAPIBase.extend({
     if(!custom_headers) {
       var token = "";
       if($.cookie("user-login")) {
-        if(typeof $.cookie("user-login") === "string") {
-          token = JSON.parse($.cookie("user-login")).token;
-        } else if(typeof $.cookie("user-login") === "object") {
-          token = $.cookie("user-login").token;
-        }
+        // if(typeof $.cookie("user-login") === "string") {
+        //   token = JSON.parse($.cookie("user-login")).token;
+        // } else if(typeof $.cookie("user-login") === "object") {
+        //   token = $.cookie("user-login").token;
+        // }
+        token = $.cookie("user-login");
       } else {
         token = config.INITIAL_API_TOKEN;
         if(console) console.warn("Used applications auth token!!");
@@ -602,16 +603,17 @@ var LoginView = FlowPanel.extend({
         // Success
         if(res) {
           if(res.authentication) {
+            // Expire in 1 year (1 year forward in time)
+            // This is to not get rand-rpbolems in API when end-user tokens expire
+            var date = new Date();
+            date.setTime(date.getTime() + (356 * 24 * 60 * 60 * 1000));
             // Save login name for future autopopulation for 300 days
-            $.cookie('user-login-name', data.login, {'expires':300, 'path': '/'});
+            $.cookie('user-login-name', data.login, {'expires':date, 'path': '/'});
             // Clear password input field
             $('#password-input', self.getElement()).val("");
             // Makes all json objects serialized/deserialized
-            $.cookie.json = true;
-            // Expire in 30min (30 forward in time)
-            var date = new Date();
-            date.setTime(date.getTime() + (30 * 60 * 1000));
-            $.cookie('user-login', res.authentication, {'expires':date, 'path': '/'});
+            //$.cookie.json = true;
+            $.cookie('user-login', res.authentication.token, {'expires':date, 'path': '/'});
             mainFlow.fadeToWidget(1);
           } else {
             if(console) console.warn("Authentication object were not wrapped correctly!");
@@ -794,9 +796,8 @@ var TopBar = FlowPanel.extend({
     var label = new Text("OceanFront ");
     var label2 = new Text("ADMIN TOOL / " + appname.toUpperCase());
     var logoutB = new Button("Logout", function(e){
-      console.log("click");
       // Erase login cookie
-      $.cookie('user-login', null, {'expires':null, 'path': '/'});
+      $.removeCookie('user-login', { path: '/' });
       // Go to LoginView
       mainFlow.fadeToWidget(0);
     });

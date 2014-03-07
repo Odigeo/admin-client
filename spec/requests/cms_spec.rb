@@ -2,22 +2,22 @@ require 'spec_helper'
 
 describe "cms" do
 
-  after do
-    teardown_browser(@b)
-  end
+  # after do
+  #   teardown_browser(@b)
+  # end
   
-  def do_login
-    @b = setup_browser URL+"/cms"
-    assert(@b.text_field(:id, "login-input"))
-      @b.text_field(:id, "login-input").wait_until_present
-      @b.text_field(:id, "login-input").set(TEST_API_USER)
-      @b.text_field(:id, "password-input").set(TEST_API_PASSWORD)
-      #@b.send_keys :enter
-      @b.div(:id, "login-confirm-button").click
-      # Wait until we can see input elements for search
-      @b.text_field(:id, "app").wait_until_present
-    rescue => e
-  end
+  # def do_login
+  #   @b = setup_browser URL+"/cms"
+  #   assert(@b.text_field(:id, "login-input"))
+  #     @b.text_field(:id, "login-input").wait_until_present
+  #     @b.text_field(:id, "login-input").set(TEST_API_USER)
+  #     @b.text_field(:id, "password-input").set(TEST_API_PASSWORD)
+  #     #@b.send_keys :enter
+  #     @b.div(:id, "login-confirm-button").click
+  #     # Wait until we can see input elements for search
+  #     @b.text_field(:id, "app").wait_until_present
+  #   rescue => e
+  # end
 
   # it "should be able to search for a application" do
   #   do_login

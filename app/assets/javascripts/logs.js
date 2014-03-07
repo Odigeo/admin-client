@@ -42,8 +42,10 @@ var DatePanel = FlowPanel.extend({
 
 		if(from_value != "" && to_value != "" && from != "Invalid Date" && to != "invalid Date") {
 			// Save values in cookie
-			$.cookie('logs-fromdate', from_value, {'expires':300, 'path': '/'});
-			$.cookie('logs-todate', to_value, {'expires':300, 'path': '/'});
+			var date = new Date();
+      date.setTime(date.getTime() + (356 * 24 * 60 * 60 * 1000));
+			$.cookie('logs-fromdate', from_value, {'expires':date, 'path': '/'});
+			$.cookie('logs-todate', to_value, {'expires':date, 'path': '/'});
 
 			// Change window if direction
 			if(direction === "forward") {
