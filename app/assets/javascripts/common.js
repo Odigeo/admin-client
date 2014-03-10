@@ -88,7 +88,7 @@ var PAPI = PAPIBase.extend({
     if(console) console.log(xhr);
     //if (console) console.log(textStatus);
     //if (console) console.log(errorThrown);
-    if(xhr.status == 419) {
+    if(xhr.status == 419 || xhr.status == 400) {
       // Need to refresh authentication token
 
       // Clear cookie first since LoginView check if it's valid
