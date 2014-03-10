@@ -92,7 +92,7 @@ var PAPI = PAPIBase.extend({
       // Need to refresh authentication token
 
       // Clear cookie first since LoginView check if it's valid
-      $.cookie("user-login", null, "/");
+      $.removeCookie('user-login', { path: '/' });
       if(window.mainFlow) {
         // Login view
         window.mainFlow.fadeToWidget(0);
