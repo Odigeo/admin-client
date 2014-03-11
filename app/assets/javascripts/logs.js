@@ -157,7 +157,7 @@ var RowItem = FocusWidget.extend({
 	},
 	getMsg: function() {
 		if(this.data.msg) {
-			return this.data.msg;
+			return this.data.msg + " ";
 		} else {
 			return "";
 		}
@@ -185,7 +185,21 @@ var RowItem = FocusWidget.extend({
 	},
 	getRemoteIP: function() {
 		if(this.data.remote_ip) {
-			return this.data.remote_ip + " ";
+			return "from " + this.data.remote_ip + " ";
+		} else {
+			return "";
+		}
+	},
+	getIP: function() {
+		if(this.data.ip) {
+			return this.data.ip + " ";
+		} else {
+			return "";
+		}
+	},
+	getUsername: function() {
+		if(this.data.username) {
+			return this.data.username + " ";
 		} else {
 			return "";
 		}
@@ -244,7 +258,7 @@ var RowItem = FocusWidget.extend({
 		}
 		// Make it ISO string with the time offset and remove T and Z character that indicate time is in UTC (we form it in local time)
 		var datestring = new Date(dateobj.valueOf() - dateobj.getTimezoneOffset()*60*1000).toISOString().replace("T", " ").replace("Z", "");
-		var row = this.getService() + tab_string + datestring + "  " + level + "\t" + this.getMethod() + this.getStatus() + this.getPath() + this.getRemoteIP() + this.getMsg() + "\n";
+		var row = this.getService() + tab_string + datestring + "  " + level + "\t" + this.getMethod() + this.getStatus() + this.getPath() + this.getUsername() + this.getMsg() + this.getIP() + this.getRemoteIP() + "\n";
 		return row;
 	},
 	render: function() {

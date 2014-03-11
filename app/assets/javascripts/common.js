@@ -603,10 +603,9 @@ var LoginView = FlowPanel.extend({
         // Success
         if(res) {
           if(res.authentication) {
-            // Expire in 1 year (1 year forward in time)
             // This is to not get rand-rpbolems in API when end-user tokens expire
             var date = new Date();
-            date.setTime(date.getTime() + (356 * 24 * 60 * 60 * 1000));
+            date.setTime(date.getTime() + (30 * 60 * 1000));
             // Save login name for future autopopulation for 300 days
             $.cookie('user-login-name', data.login, {'expires':date, 'path': '/'});
             // Clear password input field
