@@ -1,6 +1,5 @@
-GIT
-  remote: https://github.com/OceanDev/ocean-rails.git
-  revision: 09692012af05703786f0181d7b8f02dd607ce8c5
+PATH
+  remote: .
   specs:
     ocean-rails (2.6.2)
       ffi (= 1.9.0)
@@ -40,34 +39,27 @@ GEM
       multi_json (~> 1.3)
       thread_safe (~> 0.1)
       tzinfo (~> 0.3.37)
+    addressable (2.3.5)
     arel (4.0.2)
     atomic (1.1.15)
     aws-sdk (1.36.1)
       json (~> 1.4)
       nokogiri (>= 1.4.4)
       uuidtools (~> 2.1)
-    bcrypt (3.1.7)
-    bcrypt-ruby (3.1.5)
-      bcrypt (>= 3.1.3)
     builder (3.1.4)
-    childprocess (0.5.1)
-      ffi (~> 1.0, >= 1.0.11)
+    crack (0.4.2)
+      safe_yaml (~> 1.0.0)
     diff-lcs (1.2.5)
     docile (1.1.3)
     erubis (2.7.0)
     ethon (0.6.3)
       ffi (>= 1.3.0)
       mime-types (~> 1.18)
-    execjs (2.0.2)
     factory_girl (4.4.0)
       activesupport (>= 3.0.0)
     factory_girl_rails (4.4.1)
       factory_girl (~> 4.4.0)
       railties (>= 3.0.0)
-    faraday (0.8.9)
-      multipart-post (~> 1.2.0)
-    faraday_middleware (0.9.0)
-      faraday (>= 0.7.4, < 0.9)
     ffi (1.9.0)
     ffi-rzmq (1.0.3)
       ffi
@@ -84,7 +76,6 @@ GEM
     mini_portile (0.5.2)
     minitest (4.7.5)
     multi_json (1.9.0)
-    multipart-post (1.2.0)
     net-purge (0.1.0)
     nokogiri (1.6.1)
       mini_portile (~> 0.5.0)
@@ -94,6 +85,8 @@ GEM
       aws-sdk (~> 1.0)
     oj (2.6.0)
     polyglot (0.3.4)
+    protected_attributes (1.0.7)
+      activemodel (>= 4.0.1, < 5.0)
     rack (1.5.2)
     rack-attack (3.0.0)
       rack
@@ -127,12 +120,7 @@ GEM
       rspec-core (~> 2.14.0)
       rspec-expectations (~> 2.14.0)
       rspec-mocks (~> 2.14.0)
-    rubyzip (1.1.1)
-    selenium-webdriver (2.40.0)
-      childprocess (>= 0.5.0)
-      multi_json (~> 1.0)
-      rubyzip (~> 1.0)
-      websocket (~> 1.0.4)
+    safe_yaml (1.0.1)
     simplecov (0.8.2)
       docile (~> 1.1.0)
       multi_json
@@ -147,7 +135,7 @@ GEM
       actionpack (>= 3.0)
       activesupport (>= 3.0)
       sprockets (~> 2.8)
-    test-unit (2.5.5)
+    sqlite3 (1.3.9)
     thor (0.18.1)
     thread_safe (0.2.0)
       atomic (>= 1.1.7, < 2)
@@ -158,36 +146,22 @@ GEM
     typhoeus (0.6.7)
       ethon (~> 0.6.2)
     tzinfo (0.3.39)
-    uglifier (2.5.0)
-      execjs (>= 0.3.0)
-      json (>= 1.8.0)
     uuidtools (2.1.4)
-    watir-webdriver (0.6.8)
-      selenium-webdriver (>= 2.18.0)
-    watir-webdriver-rails (0.0.8)
-      watir-webdriver
-    websocket (1.0.7)
+    webmock (1.17.4)
+      addressable (>= 2.2.7)
+      crack (>= 0.3.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  bcrypt-ruby
   factory_girl_rails (~> 4.0)
-  faraday
-  faraday_middleware
-  ffi (= 1.9.0)
-  multi_json (~> 1.0)
-  net-purge
-  ocean-dynamo (>= 0.3.1)
+  jbuilder
+  ocean-dynamo (>= 0.5.6)
   ocean-rails!
-  oj
-  rack-attack
+  protected_attributes
   rails (~> 4.0)
-  rails-patch-json-encode
-  rspec-rails (~> 2.0)
-  selenium-webdriver
+  rspec-rails
   simplecov
-  test-unit (>= 2.5.5)
-  uglifier (>= 1.3.0)
-  watir-webdriver-rails
+  sqlite3
+  webmock
