@@ -11,10 +11,6 @@ gem 'faraday_middleware' # Useful for parsing JSON responses, etc.
 
 gem 'bcrypt-ruby', :require => 'bcrypt'       # Password hashing, etc
 
-gem 'rails-patch-json-encode'  # Required for Rails 4.0.x
-gem 'oj'
-
-
 group :test, :development do
   gem "rspec-rails", "~> 2.0"
   gem "simplecov", :require => false
