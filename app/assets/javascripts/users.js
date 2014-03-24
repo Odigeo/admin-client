@@ -123,7 +123,7 @@ var TopConsole = FlowPanel.extend({
 				var data = self.currentSelectedItem.data;
 				data[value_name] = new_value;
 				self.loader.show();
-				PAPI.save(self.currentSelectedItem.getLink("self"), data, function(res) {
+				PAPI._save(self.currentSelectedItem.getLink("self"), data, function(res) {
 					// Just save the data in current object rather than instantiate a new one, because then we would loose reference pointers etc
 					var type = self.currentSelectedItem.getType();
 					self.currentSelectedItem.data = res[type];
