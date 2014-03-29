@@ -474,22 +474,34 @@ var BoxItem = DragAndDropWidget.extend({
 	valueExist: function(searchValue) {
 		// Replace all * with \* to be able to search for the character and not RegEx *
 		searchValue = searchValue.replace(/\*/g, '\\*');
-		for(var obj in this.data) {
-			var value = this.data[obj];
-			if(typeof value !== "object") {
-				// So dont search in arrays or objects (like "links")
+		// If searchValue has sapces it means AND, pipe OR and semicolon attribute
+		// "api_user GET name:kalle" is same as search for "api_user AND GET AND HAS ATTRIBUTE name=kalle"
 
-				if(typeof value === "number") {
-					// Search data value as a number
-				} else if(typeof value === "string") {
-					// Search data value as a string
-					if(value.toLowerCase().match(searchValue.toLowerCase())) {
-						return true;
+		searchValue = searchValue.split(" ");
+		for(var i=0; i<searchValue.length; i++) {
+			var match = false;
+			for(var obj in this.data) {
+				var value = this.data[obj];
+				if(typeof value !== "object") {
+					// So dont search in arrays or objects (like "links")
+
+					if(typeof value === "number") {
+						// Search data value as a number
+					} else if(typeof value === "string") {
+						// Search data value as a string
+						if(value.toLowerCase().match(searchValue[i].toLowerCase())) {
+							match = true;
+							break; // Step out of for-loop
+						}
 					}
 				}
 			}
+			if(!match) {
+				// Stop searching since we didn't find this explicit record and we search with AND logic
+				return false;
+			}
 		}
-		return false;
+		return true;
 	},
 	getLink: function(rel) {
 		if(typeof this.data._links === "object" && this.data["_links"][rel]) {
@@ -667,32 +679,29 @@ var ContainerWidget = DragAndDropWidget.extend({
 		var searchI = new SearchBox();
 		this.container = new FromBucketContainer();
 
+		var filter_fn = function(that, e) {
+			// Filter
+			var result = [];
+			var itemlist = self.items;
+
+			for(var i=0; i<itemlist.length; i++) {
+				if(itemlist[i].valueExist(that.getText()))
+					result.push(itemlist[i]);
+			}
+			self.container.clear();
+			self.showItems(result);
+		};
+
 		searchI.addKeyboardListener(function(that, e) {
 			var type = e.type;
 			if(type === "keyup" && that.getText().length > -1) {
-				// Filter
-				var result = [];
-				var itemlist = self.items;
-				for(var i=0; i<itemlist.length; i++) {
-					if(itemlist[i].valueExist(that.getText()))
-						result.push(itemlist[i]);
-				}
-				self.container.clear();
-				self.showItems(result);
+				filter_fn(that, e);
 			}
 		});
 		searchI.addSearchListener(function(that, e) {
 			var type = e.type;
 			if(type === "search" && that.getText().length > -1) {
-				// Filter
-				var result = [];
-				var itemlist = self.items;
-				for(var i=0; i<itemlist.length; i++) {
-					if(itemlist[i].valueExist(that.getText()))
-						result.push(itemlist[i]);
-				}
-				self.container.clear();
-				self.showItems(result);
+				filter_fn(that, e);
 			}
 		});
 
