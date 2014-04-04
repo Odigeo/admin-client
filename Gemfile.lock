@@ -173,7 +173,7 @@ DEPENDENCIES
   multi_json (~> 1.0)
   net-purge
   ocean-dynamo (>= 0.3.1)
-  ocean-rails (>= 2.0.8)
+  ocean-rails (>= 2.9.0)
   rack-attack
   rails (~> 4.0)
   rspec-rails (~> 2.0)
