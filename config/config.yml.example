@@ -26,7 +26,7 @@ API_USER:     admin_client
 API_PASSWORD: xxxxxxxxxx
 
 # This is the base domain used for all Ocean calls.
-BASE_DOMAIN:  example.com
+BASE_DOMAIN:  swarmservices.com
 
 # This enumerates the latest versions of all resources in the system, not just the
 # ones defined by this service. You should keep it updated at all times.
