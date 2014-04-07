@@ -123,7 +123,7 @@ var PAPI = PAPIBase.extend({
     var link = "";
     if(typeof data_or_link === "string") {
       // Link
-      link = data_or_link;
+      link = this.api_domain() + data_or_link;
     } else if(typeof data_or_link === "object") {
       // Data object
       if(data_or_link.service) {
