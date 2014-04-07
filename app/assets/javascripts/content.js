@@ -58,7 +58,7 @@ var InstrumentPanel = FlowPanel.extend({
 	onSearch: function() {
 		var self = this;
 		this.loader.show();
-		PAPI._get("/v1/broadcasts", function(res) {
+		PAPI.getBroadcasts(function(res) {
 			// Success
 			self.loader.hide();
 			content.addCards(res);
@@ -111,7 +111,13 @@ var InstrumentPanel = FlowPanel.extend({
 var BroadcastCard = FlowPanel.extend({
 	init: function(data) {
 		this._super();
-		this.data = data;
+		if(data) {
+			this.data = data;
+		} else {
+			this.data = {};
+			this.data.name = "";
+			this.data.description = "";
+		}
 		this.render();
 		this.setStyleName("card");
 	},
@@ -121,44 +127,83 @@ var BroadcastCard = FlowPanel.extend({
 		var descriptionI = new TextBox();
 
 		grid.setStyleName("card-input-grid");
-		nameI.setAttributes({placeholder:"Name", data:"name"});
-		descriptionI.setAttributes({placeholder:"Description", data:"description"});
+		nameI.setAttributes({placeholder:"Name", data:"name"}).setText(this.data.name);
+		descriptionI.setAttributes({placeholder:"Description", data:"description"}).setText(this.data.description);
 
 		grid.setWidget(0,0,nameI);
 		grid.setWidget(0,1,descriptionI);
 
 		return grid;
 	},
-	render_swarm: function() {
-		var grid = new FormGrid(3,3)
+	render_swarm: function(data, resolution) {
+		if(!data) {
+			// No swarm was found for the Broadcasts - Special case where we still want to render the form to create one!
+			var data = {};
+			var resolution = "";
+			data.input_stream_uri = "";
+			data.nr_of_sources = "";
+			data.nr_of_boosters = "";
+			data.nr_of_trackers = "";
+		}
+		var holder = new FlowPanel();
+		var grid = new FormGrid(4,3)
 		var header = new TextBox();
 		var input_stream_uri = new TextBox();
 		var nr_of_sources = new TextBox();
 		var nr_of_boosters = new TextBox();
 		var nr_of_trackers = new TextBox();
+		var sources = new Text("# of Sources");
+		var boosters = new Text("# of Boosters");
+		var trackers = new Text("# of Trackers");
 
+		holder.setStyleName("delimiter");
 		grid.setStyleName("card-input-grid");
-		header.setAttributes({placeholder:"Resolution", data:"input_stream_uri"})
-		input_stream_uri.setAttributes({placeholder:"Input URL", data:"input_stream_uri"}).setStyleName("input-full-row");
-		nr_of_sources.setAttributes({placeholder:"# of Sources", data:"nr_of_sources"});
-		nr_of_boosters.setAttributes({placeholder:"# of Boosters", data:"nr_of_boosters"});
-		nr_of_trackers.setAttributes({placeholder:"# of Trackers", data:"nr_of_trackers"});
+		header.setAttributes({placeholder:"Resolution", data:"resolution"}).setText(resolution);
+		input_stream_uri.setAttributes({placeholder:"Input URL", data:"input_stream_uri"}).setStyleName("input-full-row").setText(data.input_stream_uri);
+		nr_of_sources.setAttributes({placeholder:"# of Sources", data:"nr_of_sources"}).setText(data.nr_of_sources);
+		nr_of_boosters.setAttributes({placeholder:"# of Boosters", data:"nr_of_boosters"}).setText(data.nr_of_boosters);
+		nr_of_trackers.setAttributes({placeholder:"# of Trackers", data:"nr_of_trackers"}).setText(data.nr_of_trackers);
 
+		grid.setWidget(0,1,header);
 		grid.setWidget(1,0,input_stream_uri, 3);
-		grid.setWidget(2,0,nr_of_sources);
-		grid.setWidget(2,1,nr_of_boosters);
-		grid.setWidget(2,2,nr_of_trackers);
+		grid.setWidget(2,0,sources);
+		grid.setWidget(2,1,boosters);
+		grid.setWidget(2,2,trackers);
+		grid.setWidget(3,0,nr_of_sources);
+		grid.setWidget(3,1,nr_of_boosters);
+		grid.setWidget(3,2,nr_of_trackers);
 
-		return grid;
+		holder.add(grid);
+		return holder;
 	},
 	render: function() {
+		var self = this;
 		var header = new Header2("Broadcast Content");
 
 		header.setStyleName("align-center");
 
 		this.add(header);
 		this.add(this.render_broadcast());
-		this.add(this.render_swarm());
+
+		// Add swarms that exist for this broadcast
+		if(this.data.swarms) {
+			for(key in this.data.swarms) {
+				var extras = key;
+				PAPI._get(this.data.swarms[key], function(res, extras) {
+					// Success
+					if(res && res.swarm) {
+						self.add(self.render_swarm(res.swarm, extras));
+					}
+				},
+				function(res) {
+					// Failed
+					self.add(self.render_swarm());
+				}, extras); // Send key as extras, meaning we get the resolution to keep track
+			}
+		} else {
+			// Add an empty rendering of swarm
+			self.add(self.render_swarm());
+		}
 	}
 });
 
@@ -185,7 +230,9 @@ var ContentView = FlowPanel.extend({
 				}
 			}
 		}
-		//this.holder.add(card);
+	},
+	addCard: function(card) {
+		this.holder.insert(card, this.holder.getElement(), 0);
 	},
 	clearCards: function() {
 		this.holder.clear();

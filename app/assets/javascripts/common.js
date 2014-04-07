@@ -49,7 +49,7 @@ var PAPI = PAPIBase.extend({
       }
     }
   },
-  apiCall: function(link, data, method, success_callback, error_callback, headers) {
+  apiCall: function(link, data, method, success_callback, error_callback, headers, extras) {
     
     if($.browser.msie) {
 
@@ -80,7 +80,7 @@ var PAPI = PAPIBase.extend({
     }
     
     // Make the actual API call in PAPIBase
-    this._super(link, data, method, success_callback, error_callback, headers);
+    this._super(link, data, method, success_callback, error_callback, headers, extras);
   },
   pre_error: function(xhr, textStatus, errorThrown) {
     // Override to get custom response handling
@@ -123,7 +123,7 @@ var PAPI = PAPIBase.extend({
     var link = "";
     if(typeof data_or_link === "string") {
       // Link
-      link = this.api_domain() + data_or_link;
+      link = data_or_link;
     } else if(typeof data_or_link === "object") {
       // Data object
       if(data_or_link.service) {
@@ -208,6 +208,10 @@ var PAPI = PAPIBase.extend({
     var link = this.api_domain() + "/" + this.api_version("log_excerpts_version") + "/log_excerpts/" + fromdate + "/" + todate;
     this.apiCall(link, null, "GET", success, error, this.getHeaders());
   },
+  getBroadcasts: function(success, error) {
+    var link = this.api_domain() + "/" + this.api_version("broadcasts_version") + "/broadcasts";
+    this.apiCall(link, null, "GET", success, error, this.getHeaders());
+  },
   connect: function(link1, link2, success, error) {
     link1 += '?href=' + encodeURI(link2);
     this.apiCall(link1, {}, "PUT", success, error, this.getHeaders());
@@ -216,21 +220,21 @@ var PAPI = PAPIBase.extend({
     link1 += '?href=' + encodeURI(link2);
     this.apiCall(link1, {}, "DELETE", success, error, this.getHeaders());
   },
-  _save: function(link, data, success, error) {
-    this.apiCall(link, data, "PUT", success, error, this.getHeaders());
+  _save: function(link, data, success, error, extras) {
+    this.apiCall(link, data, "PUT", success, error, this.getHeaders(), extras);
   },
-  _delete: function(link, success, error) {
-    this.apiCall(link, null, "DELETE", success, error, this.getHeaders());
+  _delete: function(link, success, error, extras) {
+    this.apiCall(link, null, "DELETE", success, error, this.getHeaders(), extras);
   },
-  _get: function(data_or_link, success, error) {
+  _get: function(data_or_link, success, error, extras) {
     var link = "";
     link = this.construct_link(data_or_link, true);
-    this.apiCall(link, null, "GET", success, error, this.getHeaders());
+    this.apiCall(link, null, "GET", success, error, this.getHeaders(), extras);
   },
-  _create: function(data, success, error) {
+  _create: function(data, success, error, extras) {
     var link = "";
     link = this.construct_link(data, false);
-    this.apiCall(link, data, "POST", success, error, this.getHeaders());
+    this.apiCall(link, data, "POST", success, error, this.getHeaders(), extras);
   }
 });
 

@@ -3,6 +3,10 @@ body {
 	background-color: #66CCFF;
 }
 
+.delimiter {
+	margin-top: 10px;
+	border-top: 1px solid #ccc;
+}
 
 #instrument-panel {
 	position: fixed;
@@ -63,6 +67,7 @@ body {
 	padding: 2px 5px 2px 5px;
 	border-radius: 10px;
 	border: 1px solid #ccc;
+	background-color: rgb(225,225,225);
 }
 
 .input-full-row {
