@@ -1,11 +1,14 @@
 body {
 	background-image: url(../images/bg.png);
-	background-color: #66CCFF;
+	background-color: #001;
 }
 
-.delimiter {
-	margin-top: 10px;
-	border-top: 1px solid #ccc;
+.textLarge {
+	font-size: 30px !important;
+}
+
+.textBlue {
+	color: #66CCFF;
 }
 
 #instrument-panel {
@@ -46,9 +49,8 @@ body {
 .card {
 	width: 900px;
 	padding: 10px;
-	border: 1px solid white;
 
-	background-color: rgb(230,230,230);
+	background: -webkit-linear-gradient(top, rgb(255,255,255) , rgb(240,240,240)), url(../images/noise.png);
 	border-radius: 5px;
 	box-shadow: 10px 10px 15px rgba(0,0,0,0.3);
 
@@ -59,17 +61,39 @@ body {
 	-webkit-transition-timing-function: ease-in;
 }
 
+.card-input-grid {
+	margin: 10px 0px 0px 0px;
+}
+
 .card-input-grid input {
 	margin: 2px 5px 2px 5px;
 	width: 160px;
-	height: 30px;
+	min-height: 30px;
 	font-size: 14px;
 	padding: 2px 5px 2px 5px;
 	border-radius: 10px;
-	border: 1px solid #ccc;
-	background-color: rgb(225,225,225);
+	background-color: rgba(0,0,0,0.0);
 }
 
 .input-full-row {
 	width: 523px !important;
+}
+
+.input-full-card {
+	width: 800px !important;
+}
+
+.swarms-holder {
+	overflow-y: hidden;
+	overflow-x: hidden;
+}
+
+.swarms-click-header {
+	padding: 13px 0px 0px 0px;
+	height: 30px;
+	width: 100%;
+}
+
+.swarms-click-header:hover {
+	background: -webkit-linear-gradient(top, rgb(240,240,240) , rgb(200,200,200)), url(../images/noise.png);
 }

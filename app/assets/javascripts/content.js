@@ -120,18 +120,19 @@ var BroadcastCard = FlowPanel.extend({
 		}
 		this.render();
 		this.setStyleName("card");
+		this.setCl
 	},
 	render_broadcast: function() {
-		var grid = new FormGrid(1,2);
+		var grid = new FormGrid(2,1);
 		var nameI = new TextBox();
 		var descriptionI = new TextBox();
 
 		grid.setStyleName("card-input-grid");
-		nameI.setAttributes({placeholder:"Name", data:"name"}).setText(this.data.name);
-		descriptionI.setAttributes({placeholder:"Description", data:"description"}).setText(this.data.description);
+		nameI.setAttributes({placeholder:"Name", data:"name"}).setText(this.data.name).setStyleName("input-full-card textBlue align-center textLarge");
+		descriptionI.setAttributes({placeholder:"Description", data:"description"}).setText(this.data.description).setStyleName("input-full-card align-center");
 
 		grid.setWidget(0,0,nameI);
-		grid.setWidget(0,1,descriptionI);
+		grid.setWidget(1,0,descriptionI);
 
 		return grid;
 	},
@@ -145,7 +146,6 @@ var BroadcastCard = FlowPanel.extend({
 			data.nr_of_boosters = "";
 			data.nr_of_trackers = "";
 		}
-		var holder = new FlowPanel();
 		var grid = new FormGrid(4,3)
 		var header = new TextBox();
 		var input_stream_uri = new TextBox();
@@ -156,13 +156,12 @@ var BroadcastCard = FlowPanel.extend({
 		var boosters = new Text("# of Boosters");
 		var trackers = new Text("# of Trackers");
 
-		holder.setStyleName("delimiter");
 		grid.setStyleName("card-input-grid");
-		header.setAttributes({placeholder:"Resolution", data:"resolution"}).setText(resolution);
-		input_stream_uri.setAttributes({placeholder:"Input URL", data:"input_stream_uri"}).setStyleName("input-full-row").setText(data.input_stream_uri);
-		nr_of_sources.setAttributes({placeholder:"# of Sources", data:"nr_of_sources"}).setText(data.nr_of_sources);
-		nr_of_boosters.setAttributes({placeholder:"# of Boosters", data:"nr_of_boosters"}).setText(data.nr_of_boosters);
-		nr_of_trackers.setAttributes({placeholder:"# of Trackers", data:"nr_of_trackers"}).setText(data.nr_of_trackers);
+		header.setAttributes({placeholder:"Resolution", data:"resolution"}).setText(resolution).setStyleName("align-center");
+		input_stream_uri.setAttributes({placeholder:"Input URL", data:"input_stream_uri"}).setStyleName("input-full-row align-center").setText(data.input_stream_uri);
+		nr_of_sources.setAttributes({placeholder:"#", data:"nr_of_sources"}).setText(data.nr_of_sources).setStyleName("align-center");
+		nr_of_boosters.setAttributes({placeholder:"#", data:"nr_of_boosters"}).setText(data.nr_of_boosters).setStyleName("align-center");
+		nr_of_trackers.setAttributes({placeholder:"#", data:"nr_of_trackers"}).setText(data.nr_of_trackers).setStyleName("align-center");
 
 		grid.setWidget(0,1,header);
 		grid.setWidget(1,0,input_stream_uri, 3);
@@ -173,36 +172,49 @@ var BroadcastCard = FlowPanel.extend({
 		grid.setWidget(3,1,nr_of_boosters);
 		grid.setWidget(3,2,nr_of_trackers);
 
-		holder.add(grid);
-		return holder;
+		return grid;
 	},
 	render: function() {
 		var self = this;
-		var header = new Header2("Broadcast Content");
+		var swarms_holder = new FlowPanel();
+		var click_header = new Text("Click to toggle Swarms");
 
-		header.setStyleName("align-center");
+		swarms_holder.setStyleName("swarms-holder").setHeight("0px");
+		click_header.setStyleName("swarms-click-header");
 
-		this.add(header);
 		this.add(this.render_broadcast());
+		this.add(new Delimiter());
+		this.add(click_header);
+		this.add(new Delimiter());
+		this.add(swarms_holder);
 
-		// Add swarms that exist for this broadcast
+		click_header.addClickListener(function(e) {
+			// Toggle holder
+			if(swarms_holder.getHeight() == "0px") {
+				swarms_holder.setHeight("100%");
+			} else {
+				swarms_holder.setHeight("0px");
+			}
+		});
+
+		// Add rendered swarms that exist for this broadcast
 		if(this.data.swarms) {
 			for(key in this.data.swarms) {
 				var extras = key;
 				PAPI._get(this.data.swarms[key], function(res, extras) {
 					// Success
 					if(res && res.swarm) {
-						self.add(self.render_swarm(res.swarm, extras));
+						// Add rendered swarm to holder
+						swarms_holder.add(self.render_swarm(res.swarm, extras));
 					}
 				},
 				function(res) {
 					// Failed
-					self.add(self.render_swarm());
 				}, extras); // Send key as extras, meaning we get the resolution to keep track
 			}
 		} else {
 			// Add an empty rendering of swarm
-			self.add(self.render_swarm());
+			swarms_holder.add(self.render_swarm());
 		}
 	}
 });
