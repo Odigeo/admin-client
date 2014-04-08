@@ -97,3 +97,20 @@ body {
 .swarms-click-header:hover {
 	background: -webkit-linear-gradient(top, rgb(240,240,240) , rgb(200,200,200)), url(../images/noise.png);
 }
+
+.broadcast-button-holder {
+	position: absolute;
+	top: -20px;
+	left: 830px;
+}
+
+.swarm-button-holder {
+	position: absolute;
+	top: -10px;
+	left: 830px;
+}
+
+.bbCard {
+	font-size: 10px;
+	font-weight: normal;
+}

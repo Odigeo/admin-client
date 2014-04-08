@@ -115,8 +115,6 @@ var BroadcastCard = FlowPanel.extend({
 			this.data = data;
 		} else {
 			this.data = {};
-			this.data.name = "";
-			this.data.description = "";
 		}
 		this.render();
 		this.setStyleName("card");
@@ -126,25 +124,38 @@ var BroadcastCard = FlowPanel.extend({
 		var grid = new FormGrid(2,1);
 		var nameI = new TextBox();
 		var descriptionI = new TextBox();
+		var holder = new FlowPanel();
+		var buttonHolder = new VerticalPanel();
+		var deleteButton = new BonBonButton("Delete", function() {
+			// Delete
+			if(confirm("This will permanently delete this Broadcast resource along with its Swarm resources!!")) {
+				// User clicked Yes
+				console.log("Deleting Broadcast and swarms");
+			} else {
+				// User clicked No
+			}
+		}, "✗");
 
 		grid.setStyleName("card-input-grid");
 		nameI.setAttributes({placeholder:"Name", data:"name"}).setText(this.data.name).setStyleName("input-full-card textBlue align-center textLarge");
 		descriptionI.setAttributes({placeholder:"Description", data:"description"}).setText(this.data.description).setStyleName("input-full-card align-center");
+		buttonHolder.setStyleName("broadcast-button-holder");
+		deleteButton.setStyleName("bbCard bbPink");
+		holder.setStyleName("u20")
+
+		buttonHolder.add(deleteButton);
 
 		grid.setWidget(0,0,nameI);
 		grid.setWidget(1,0,descriptionI);
 
-		return grid;
+		holder.add(buttonHolder);
+		holder.add(grid);
+
+		return holder;
 	},
 	render_swarm: function(data, resolution) {
 		if(!data) {
-			// No swarm was found for the Broadcasts - Special case where we still want to render the form to create one!
-			var data = {};
-			var resolution = "";
-			data.input_stream_uri = "";
-			data.nr_of_sources = "";
-			data.nr_of_boosters = "";
-			data.nr_of_trackers = "";
+			data = {};
 		}
 		var grid = new FormGrid(4,3)
 		var header = new TextBox();
@@ -155,6 +166,17 @@ var BroadcastCard = FlowPanel.extend({
 		var sources = new Text("# of Sources");
 		var boosters = new Text("# of Boosters");
 		var trackers = new Text("# of Trackers");
+		var holder = new FlowPanel();
+		var buttonHolder = new VerticalPanel();
+		var deleteButton = new BonBonButton("Delete", function() {
+			// Delete
+			if(confirm("This will permanently delete this Broadcast resource along with its Swarm resources!!")) {
+				// User clicked Yes
+				console.log("Deleting Broadcast and swarms");
+			} else {
+				// User clicked No
+			}
+		}, "✗");
 
 		grid.setStyleName("card-input-grid");
 		header.setAttributes({placeholder:"Resolution", data:"resolution"}).setText(resolution).setStyleName("align-center");
@@ -162,7 +184,11 @@ var BroadcastCard = FlowPanel.extend({
 		nr_of_sources.setAttributes({placeholder:"#", data:"nr_of_sources"}).setText(data.nr_of_sources).setStyleName("align-center");
 		nr_of_boosters.setAttributes({placeholder:"#", data:"nr_of_boosters"}).setText(data.nr_of_boosters).setStyleName("align-center");
 		nr_of_trackers.setAttributes({placeholder:"#", data:"nr_of_trackers"}).setText(data.nr_of_trackers).setStyleName("align-center");
+		buttonHolder.setStyleName("swarm-button-holder");
+		deleteButton.setStyleName("bbCard bbPink");
 
+		buttonHolder.add(deleteButton);
+		
 		grid.setWidget(0,1,header);
 		grid.setWidget(1,0,input_stream_uri, 3);
 		grid.setWidget(2,0,sources);
@@ -172,7 +198,10 @@ var BroadcastCard = FlowPanel.extend({
 		grid.setWidget(3,1,nr_of_boosters);
 		grid.setWidget(3,2,nr_of_trackers);
 
-		return grid;
+		holder.add(buttonHolder);
+		holder.add(grid);
+
+		return holder;
 	},
 	render: function() {
 		var self = this;

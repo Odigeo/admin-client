@@ -718,7 +718,11 @@ var LoginView = FlowPanel.extend({
 
 var GradientButton = FocusWidget.extend({
 	init: function(name, fn) {
-		this.name = name;
+    if(name) {
+      this.name = name;
+    } else {
+		  this.name = "";
+    }
 		this._super(this.render());
 
 		if(fn) {
