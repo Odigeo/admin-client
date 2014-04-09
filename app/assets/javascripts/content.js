@@ -118,36 +118,132 @@ var BroadcastCard = FlowPanel.extend({
 		}
 		this.render();
 		this.setStyleName("card");
-		this.setCl
 	},
 	render_broadcast: function() {
+		var self = this;
 		var grid = new FormGrid(2,1);
 		var nameI = new TextBox();
 		var descriptionI = new TextBox();
 		var holder = new FlowPanel();
-		var buttonHolder = new VerticalPanel();
+		var buttonHolder = new HorizontalPanel();
+		var errorText = new Text("");
 		var deleteButton = new BonBonButton("Delete", function() {
 			// Delete
 			if(confirm("This will permanently delete this Broadcast resource along with its Swarm resources!!")) {
 				// User clicked Yes
 				console.log("Deleting Broadcast and swarms");
-			} else {
-				// User clicked No
+				self.loader.show();
+				// Delete all Swarm resources
+				for(var key in self.data.swarms) {
+					console.log("Deleting swarm: " + key);
+					var extra = key;
+					PAPI._delete(self.data.swarms[key], function(res, extra) {
+						// Success delete swarm
+						console.log("Successfully deleted swarm: " + extra);
+					},
+					function() {
+						// Failed delete swarm
+						console.log("Failed to delete swarm");
+					}, extra);
+				}
+				// Delete the Broadcast resource
+				PAPI._delete(self.data._links.self.href, function(res) {
+					console.log("Successfully deleted Broadcast");
+					// Update list
+					self.loader.hide();
+					content.ip.onSearch();
+				}, function() {
+					console.warn("Failed to delete Broadcast");
+					self.loader.hide();
+				});
+				
 			}
 		}, "✗");
+		var saveButton = new BonBonButton("Save", function() {
+			self.loader.show();
+			if(!self.data.name) {
+				var swarm_data = {};
+				// Only take first if several Swarms are present when creating
+				$.map($(".swarms-holder input", self.getElement()), function(obj, key) {
+					console.log(obj);
+					var attribute = $(obj).attr("data");
+					swarm_data[attribute] = $(obj).val();
+				});
+				// New Broadcast and Swarm will be created
+				PAPI.createSwarm(swarm_data, function(res) {
+					console.log("Successfully created Swarm");
+					var broadcast_data = {};
+					$.map($(".broadcast-holder input", self.getElement()), function(obj, key) {
+						var attribute = $(obj).attr("data");
+						broadcast_data[attribute] = $(obj).val();
+					});
+					broadcast_data.swarms = {};
+					broadcast_data.swarms[swarm_data.resolution] = res.swarm._links.self.href;
+					PAPI.createBroadcast(broadcast_data, function() {
+						console.log("Successfully created Broadcast");
+						// Update list
+						self.loader.hide();
+						content.ip.onSearch();
+					},
+					function(xhr, textStatus) {
+						// Failed Broadcast
+						console.warn("Failed to create Broadcast");
+						errorText.setText("textStatus");
+						self.loader.hide();
+					});
+				},
+				function(xhr, textStatus) {
+					// Failed Swarm
+					console.warn("Failed to create Swarm");
+					errorText.setText("textStatus");
+					self.loader.hide();
+				});
+			} else {
+				console.log("Saving Broadcast");
+				// Update self.data from inputs
+				// Loop over all inputs for Broadcast and update self.data
+				$.map($("input", holder.getElement()), function(obj, key) {
+					var attribute = $(obj).attr("data");
+					self.data[attribute] = $(obj).val();
+				});
+				// Save the Broadcast resource
+				PAPI._save(self.data._links.self.href, self.data, function(res) {
+					console.log("Successfully saved Broadcast");
+					// Update list
+					self.loader.hide();
+					content.ip.onSearch();
+				}, function(xhr, textStatus) {
+					console.warn("Failed to save Broadcast");
+					errorText.setText("textStatus");
+					self.loader.hide();
+				});
+			}
+		}, "✓");
+		var createSwarmButton = new BonBonButton("Create new Swarm", function() {
+			// Add an empty rendering of swarm
+			self.swarms_holder.add(self.render_swarm());
+			// Open Swarms section
+			self.swarms_holder.setHeight("100%");
+		}, "✓");
 
 		grid.setStyleName("card-input-grid");
 		nameI.setAttributes({placeholder:"Name", data:"name"}).setText(this.data.name).setStyleName("input-full-card textBlue align-center textLarge");
 		descriptionI.setAttributes({placeholder:"Description", data:"description"}).setText(this.data.description).setStyleName("input-full-card align-center");
 		buttonHolder.setStyleName("broadcast-button-holder");
 		deleteButton.setStyleName("bbCard bbPink");
-		holder.setStyleName("u20")
+		saveButton.setStyleName("bbCard bbGreen");
+		holder.setStyleName("u20 broadcast-holder");
+		createSwarmButton.setStyleName("bbCard bbGreen right");
+		errorText.setStyleName("error-text");
 
+		buttonHolder.add(createSwarmButton);
+		buttonHolder.add(saveButton);
 		buttonHolder.add(deleteButton);
 
 		grid.setWidget(0,0,nameI);
 		grid.setWidget(1,0,descriptionI);
 
+		holder.add(errorText);
 		holder.add(buttonHolder);
 		holder.add(grid);
 
@@ -157,9 +253,10 @@ var BroadcastCard = FlowPanel.extend({
 		if(!data) {
 			data = {};
 		}
-		var grid = new FormGrid(4,3)
+		var grid = new FormGrid(5,3)
 		var header = new TextBox();
 		var input_stream_uri = new TextBox();
+		var instance_type = new TextBox();
 		var nr_of_sources = new TextBox();
 		var nr_of_boosters = new TextBox();
 		var nr_of_trackers = new TextBox();
@@ -167,16 +264,37 @@ var BroadcastCard = FlowPanel.extend({
 		var boosters = new Text("# of Boosters");
 		var trackers = new Text("# of Trackers");
 		var holder = new FlowPanel();
-		var buttonHolder = new VerticalPanel();
+		var buttonHolder = new HorizontalPanel();
 		var deleteButton = new BonBonButton("Delete", function() {
 			// Delete
-			if(confirm("This will permanently delete this Broadcast resource along with its Swarm resources!!")) {
+			if(confirm("This will terminate the swarm with its workers!")) {
 				// User clicked Yes
-				console.log("Deleting Broadcast and swarms");
+				console.log("Deleting swarm");
 			} else {
 				// User clicked No
 			}
 		}, "✗");
+		var saveButton = new BonBonButton("Save", function() {
+			console.log("Saving swarm");
+			if(!data.input_stream_uri) {
+				// Create
+
+				// Loop over all inputs for Broadcast and update self.data
+				$.map($("input", holder.getElement()), function(obj, key) {
+					var attribute = $(obj).attr("data");
+					data[attribute] = $(obj).val();
+				});
+				PAPI.createSwarm(data, function(res) {
+					console.log("Successfully created Swarm");
+				},
+				function() {
+					console.warn("Failed to create Swarm");
+				});
+			} else {
+				// Save
+			}
+		}, "✓");
+		var errorText = new Text("");
 
 		grid.setStyleName("card-input-grid");
 		header.setAttributes({placeholder:"Resolution", data:"resolution"}).setText(resolution).setStyleName("align-center");
@@ -184,20 +302,27 @@ var BroadcastCard = FlowPanel.extend({
 		nr_of_sources.setAttributes({placeholder:"#", data:"nr_of_sources"}).setText(data.nr_of_sources).setStyleName("align-center");
 		nr_of_boosters.setAttributes({placeholder:"#", data:"nr_of_boosters"}).setText(data.nr_of_boosters).setStyleName("align-center");
 		nr_of_trackers.setAttributes({placeholder:"#", data:"nr_of_trackers"}).setText(data.nr_of_trackers).setStyleName("align-center");
+		instance_type.setAttributes({placeholder:"Instance type", data:"instance_type"}).setText(data.instance_type).setStyleName("align-center");
+		holder.setStyleName("swarms-holder");
 		buttonHolder.setStyleName("swarm-button-holder");
 		deleteButton.setStyleName("bbCard bbPink");
-
+		saveButton.setStyleName("bbCard bbGreen");
+		errorText.setStyleName("error-text");
+		
+		buttonHolder.add(saveButton);
 		buttonHolder.add(deleteButton);
 		
 		grid.setWidget(0,1,header);
 		grid.setWidget(1,0,input_stream_uri, 3);
-		grid.setWidget(2,0,sources);
-		grid.setWidget(2,1,boosters);
-		grid.setWidget(2,2,trackers);
-		grid.setWidget(3,0,nr_of_sources);
-		grid.setWidget(3,1,nr_of_boosters);
-		grid.setWidget(3,2,nr_of_trackers);
+		grid.setWidget(2,1,instance_type);
+		grid.setWidget(3,0,sources);
+		grid.setWidget(3,1,boosters);
+		grid.setWidget(3,2,trackers);
+		grid.setWidget(4,0,nr_of_sources);
+		grid.setWidget(4,1,nr_of_boosters);
+		grid.setWidget(4,2,nr_of_trackers);
 
+		holder.add(errorText);
 		holder.add(buttonHolder);
 		holder.add(grid);
 
@@ -205,24 +330,26 @@ var BroadcastCard = FlowPanel.extend({
 	},
 	render: function() {
 		var self = this;
-		var swarms_holder = new FlowPanel();
-		var click_header = new Text("Click to toggle Swarms");
+		this.loader = new WidgetLoader();
+		this.swarms_holder = new FlowPanel();
+		this.click_header = new Text("Click to toggle Swarms");
 
-		swarms_holder.setStyleName("swarms-holder").setHeight("0px");
-		click_header.setStyleName("swarms-click-header");
+		this.swarms_holder.setStyleName("swarms-holder").setHeight("0px");
+		this.click_header.setStyleName("swarms-click-header");
 
+		this.add(this.loader);
 		this.add(this.render_broadcast());
 		this.add(new Delimiter());
-		this.add(click_header);
+		this.add(this.click_header);
 		this.add(new Delimiter());
-		this.add(swarms_holder);
+		this.add(this.swarms_holder);
 
-		click_header.addClickListener(function(e) {
+		this.click_header.addClickListener(function(e) {
 			// Toggle holder
-			if(swarms_holder.getHeight() == "0px") {
-				swarms_holder.setHeight("100%");
+			if(self.swarms_holder.getHeight() == "0px") {
+				self.swarms_holder.setHeight("100%");
 			} else {
-				swarms_holder.setHeight("0px");
+				self.swarms_holder.setHeight("0px");
 			}
 		});
 
@@ -234,7 +361,7 @@ var BroadcastCard = FlowPanel.extend({
 					// Success
 					if(res && res.swarm) {
 						// Add rendered swarm to holder
-						swarms_holder.add(self.render_swarm(res.swarm, extras));
+						self.swarms_holder.add(self.render_swarm(res.swarm, extras));
 					}
 				},
 				function(res) {
@@ -243,7 +370,9 @@ var BroadcastCard = FlowPanel.extend({
 			}
 		} else {
 			// Add an empty rendering of swarm
-			swarms_holder.add(self.render_swarm());
+			self.swarms_holder.add(self.render_swarm());
+			// Open Swarms section
+			self.swarms_holder.setHeight("100%");
 		}
 	}
 });
@@ -257,6 +386,8 @@ var ContentView = FlowPanel.extend({
 	setVisible: function(bool) {
 		if(bool) {
 		  document.title = "Content";
+		  // Make a search
+		  this.ip.onSearch();
 		}
 		this._super(bool);
 	},
@@ -280,13 +411,13 @@ var ContentView = FlowPanel.extend({
 	},
 	render: function() {
 		var tb = new TopBar();
-		var ip = new InstrumentPanel();
+		this.ip = new InstrumentPanel();
 		this.holder = new FlowPanel();
 
 		this.holder.setId("card-holder");
 
 		this.add(tb);
-		this.add(ip);
+		this.add(this.ip);
 		this.add(this.holder);
 	}
 });

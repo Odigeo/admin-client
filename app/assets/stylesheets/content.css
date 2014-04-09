@@ -62,7 +62,7 @@ body {
 }
 
 .card-input-grid {
-	margin: 10px 0px 0px 0px;
+	margin: 20px 0px 0px 0px;
 }
 
 .card-input-grid input {
@@ -100,17 +100,27 @@ body {
 
 .broadcast-button-holder {
 	position: absolute;
-	top: -20px;
-	left: 830px;
+	top: -15px;
+	left: 640px;
+	z-index: 20;
 }
 
 .swarm-button-holder {
 	position: absolute;
-	top: -10px;
-	left: 830px;
+	top: -5px;
+	left: 770px;
+	z-index: 20;
 }
 
 .bbCard {
 	font-size: 10px;
 	font-weight: normal;
+	background-color: rgb(255,255,255);
+	border: 1px solid #ccc;
+}
+
+.error-text {
+	color: red;
+	height: 12px;
+	font-size: 10px;
 }

@@ -212,6 +212,14 @@ var PAPI = PAPIBase.extend({
     var link = this.api_domain() + "/" + this.api_version("broadcasts_version") + "/broadcasts";
     this.apiCall(link, null, "GET", success, error, this.getHeaders());
   },
+  createSwarm: function(data, success, error, extras) {
+    var link = this.api_domain() + "/" + this.api_version("swarms_version") + "/swarms/";
+    this.apiCall(link, data, "POST", success, error, this.getHeaders(), extras);
+  },
+  createBroadcast: function(data, success, error, extras) {
+    var link = this.api_domain() + "/" + this.api_version("broadcast_version") + "/broadcasts/";
+    this.apiCall(link, data, "POST", success, error, this.getHeaders(), extras);
+  },
   connect: function(link1, link2, success, error) {
     link1 += '?href=' + encodeURI(link2);
     this.apiCall(link1, {}, "PUT", success, error, this.getHeaders());
