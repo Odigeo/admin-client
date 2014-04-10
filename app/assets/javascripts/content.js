@@ -111,6 +111,7 @@ var InstrumentPanel = FlowPanel.extend({
 var BroadcastCard = FlowPanel.extend({
 	init: function(data) {
 		this._super();
+		this.formgrids = [];
 		if(data) {
 			this.data = data;
 		} else {
@@ -162,6 +163,7 @@ var BroadcastCard = FlowPanel.extend({
 		var saveButton = new BonBonButton("Save", function() {
 			self.loader.show();
 			if(!self.data.name) {
+				// Create new Broadcast and 1 swarm
 				var swarm_data = {};
 				// Only take first if several Swarms are present when creating
 				$.map($(".swarms-holder input", self.getElement()), function(obj, key) {
@@ -236,7 +238,10 @@ var BroadcastCard = FlowPanel.extend({
 		createSwarmButton.setStyleName("bbCard bbGreen right");
 		errorText.setStyleName("error-text");
 
-		buttonHolder.add(createSwarmButton);
+		if(self.data.name) {
+			// Only render create new additional swarm button when rendering broadcast resource from API
+			buttonHolder.add(createSwarmButton);
+		}
 		buttonHolder.add(saveButton);
 		buttonHolder.add(deleteButton);
 
@@ -247,19 +252,57 @@ var BroadcastCard = FlowPanel.extend({
 		holder.add(buttonHolder);
 		holder.add(grid);
 
+		this.formgrids.push(grid);
+
 		return holder;
 	},
 	render_swarm: function(data, resolution_value) {
 		if(!data) {
 			data = {};
 		}
-		var grid = new FormGrid(8,2)
-		var resolution = new TextBox();
-		var input_stream_uri = new TextBox();
-		var instance_type = new TextBox();
-		var nr_of_sources = new TextBox();
-		var nr_of_boosters = new TextBox();
-		var nr_of_trackers = new TextBox();
+		var grid = new FormGrid(9,2)
+		var resolution = new TextBox(function() {
+			var value = $(this.getElement()).val();
+			if(value.search("x") > -1) {
+				return true;
+			}
+			return false;
+		});
+		var input_stream_uri = new TextBox(function() {
+			var value = $(this.getElement()).val();
+			if(value.search("http://") > -1 || value.search("https://") > -1) {
+				return true;
+			}
+			return false;
+		});
+		var instance_type = new TextBox(function() {
+			var value = $(this.getElement()).val();
+			if(value.search(".")) {
+				return true;
+			}
+			return false;
+		});
+		var nr_of_sources = new TextBox(function() {
+			var value = $(this.getElement()).val();
+			if(value >= 1) {
+				return true;
+			}
+			return false;
+		});
+		var nr_of_boosters = new TextBox(function() {
+			var value = $(this.getElement()).val();
+			if(value >= 0) {
+				return true;
+			}
+			return false;
+		});
+		var nr_of_trackers = new TextBox(function() {
+			var value = $(this.getElement()).val();
+			if(value >= 1) {
+				return true;
+			}
+			return false;
+		});
 		var created_at = new Text();
 		var updated_at = new Text();
 		var created_atLabel = new Text("Created at");
@@ -284,33 +327,26 @@ var BroadcastCard = FlowPanel.extend({
 		}, "✗");
 		var saveButton = new BonBonButton("Save", function() {
 			console.log("Saving swarm");
-			if(!data.input_stream_uri) {
-				// Create
+			// Loop over all inputs for Broadcast and update self.data
+			$.map($("input", holder.getElement()), function(obj, key) {
+				var attribute = $(obj).attr("data");
+				data[attribute] = $(obj).val();
+			});
 
-				// Loop over all inputs for Broadcast and update self.data
-				$.map($("input", holder.getElement()), function(obj, key) {
-					var attribute = $(obj).attr("data");
-					data[attribute] = $(obj).val();
-				});
-				PAPI.createSwarm(data, function(res) {
-					console.log("Successfully created Swarm");
-				},
-				function() {
-					console.warn("Failed to create Swarm");
-				});
-			} else {
-				// Save
-			}
+			// PAPI save
 		}, "✓");
 		var errorText = new Text("");
 
+		$(saveButton.getElement()).attr("name", "save").attr("type","submit");
+		$(deleteButton.getElement()).attr("name", "cancel").attr("type","button");
+
 		grid.setStyleName("card-input-grid");
-		resolution.setAttributes({placeholder:"Resolution", data:"resolution"}).setText(resolution_value);
-		input_stream_uri.setAttributes({placeholder:"http://10.0.0.116:8090", data:"input_stream_uri"}).setText(data.input_stream_uri);
-		nr_of_sources.setAttributes({placeholder:"1", data:"nr_of_sources"}).setText(data.nr_of_sources);
-		nr_of_boosters.setAttributes({placeholder:"0", data:"nr_of_boosters"}).setText(data.nr_of_boosters);
-		nr_of_trackers.setAttributes({placeholder:"1", data:"nr_of_trackers"}).setText(data.nr_of_trackers);
-		instance_type.setAttributes({placeholder:"t1.micro", data:"instance_type"}).setText(data.instance_type);
+		resolution.setAttributes({placeholder:"Resolution", data:"resolution", errormessage:"Must be following syntax: 1024x768"}).setText(resolution_value);
+		input_stream_uri.setAttributes({placeholder:"http://10.0.0.116:8090", data:"input_stream_uri", errormessage:"Must be a valid HTTP URL"}).setText(data.input_stream_uri);
+		nr_of_sources.setAttributes({placeholder:"1", data:"nr_of_sources", errormessage:"Must be at least 1 source"}).setText(data.nr_of_sources);
+		nr_of_boosters.setAttributes({placeholder:"0", data:"nr_of_boosters", errormessage:"Boosters are optional"}).setText(data.nr_of_boosters);
+		nr_of_trackers.setAttributes({placeholder:"1", data:"nr_of_trackers", errormessage:"Must be at least 1 tracker"}).setText(data.nr_of_trackers);
+		instance_type.setAttributes({placeholder:"t1.micro", data:"instance_type", errormessage:"Must be a valid Amazon instance type"}).setText(data.instance_type);
 		holder.setStyleName("swarms-card");
 		created_at.setText(data.created_at);
 		updated_at.setText(data.updated_at);
@@ -319,10 +355,44 @@ var BroadcastCard = FlowPanel.extend({
 		saveButton.setStyleName("bbCard bbGreen");
 		errorText.setStyleName("error-text");
 		idLabel.setStyleName("id-label").setText(data.id);
-		
-		buttonHolder.add(saveButton);
-		buttonHolder.add(deleteButton);
 
+		if(data.input_stream_uri) {
+			// Add buttons if valid swarm resource, meaning we wont add buttons when rendering card for new resource
+			// Save at Broadcast takes care of creating swarm and broadcast in correct order
+			buttonHolder.add(saveButton);
+			buttonHolder.add(deleteButton);
+		}
+
+		grid.addOnSave(function(form,event){
+			// Valid form do PAPI call
+			console.log("Valid form");
+			// Collect data
+			var data = {};
+			data.service = "api_users";
+			var inputs = $('input', grid.getElement());
+			for(var i=0;i<inputs.length;i++) {
+				data[inputs[i].name] = $(inputs[i]).val();
+			}
+			// save
+			/*
+			self.loader.show();
+			PAPI._save(data, function(res) {
+				console.log("Created User");
+				window.users.refresh();
+				form.clearAll();
+				self.loader.hide();
+				self.hide();
+			},
+			function(res) {
+				// Failed
+				self.loader.hide();
+			});*/
+		});
+
+		grid.addOnCancel(function(form,event){
+			//form.clearAll();
+		});
+		
 		grid.setWidget(0,0,resolutionLabel);
 		grid.setWidget(0,1,resolution);
 		grid.setWidget(1,0,input_stream_uriLabel);
@@ -339,11 +409,13 @@ var BroadcastCard = FlowPanel.extend({
 		grid.setWidget(6,1,created_at);
 		grid.setWidget(7,0,update_atLabel);
 		grid.setWidget(7,1,updated_at);
+		grid.setWidget(8,0,buttonHolder);
 
 		holder.add(errorText);
 		holder.add(idLabel);
-		holder.add(buttonHolder);
 		holder.add(grid);
+
+		this.formgrids.push(grid);
 
 		return holder;
 	},
