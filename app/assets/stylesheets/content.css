@@ -68,11 +68,15 @@ body {
 .card-input-grid input {
 	margin: 2px 5px 2px 5px;
 	width: 160px;
-	min-height: 30px;
 	font-size: 14px;
 	padding: 2px 5px 2px 5px;
 	border-radius: 10px;
 	background-color: rgba(0,0,0,0.0);
+}
+
+.card-input-grid td div {
+	width: 160px;
+	text-align: right;
 }
 
 .input-full-row {
@@ -86,6 +90,21 @@ body {
 .swarms-holder {
 	overflow-y: hidden;
 	overflow-x: hidden;
+}
+
+.swarms-card {
+	width: 450px;
+	display: inline-block;
+	padding: 0px 0px 20px 0px;
+	margin: 20px 0px 0px 0px;
+	border: 1px solid #ddd;
+}
+
+.id-label {
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	font-size: 9px;
 }
 
 .swarms-click-header {
@@ -107,8 +126,8 @@ body {
 
 .swarm-button-holder {
 	position: absolute;
-	top: -5px;
-	left: 770px;
+	top: -2px;
+	left: 158px;
 	z-index: 20;
 }
 

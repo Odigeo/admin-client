@@ -253,19 +253,24 @@ var BroadcastCard = FlowPanel.extend({
 		if(!data) {
 			data = {};
 		}
-		var grid = new FormGrid(6,2)
+		var grid = new FormGrid(8,2)
 		var resolution = new TextBox();
 		var input_stream_uri = new TextBox();
 		var instance_type = new TextBox();
 		var nr_of_sources = new TextBox();
 		var nr_of_boosters = new TextBox();
 		var nr_of_trackers = new TextBox();
+		var created_at = new Text();
+		var updated_at = new Text();
+		var created_atLabel = new Text("Created at");
+		var update_atLabel = new Text("Updated at");
 		var nr_of_sourcesLabel = new Text("Sources");
 		var nr_of_boostersLabel = new Text("Boosters");
 		var nr_of_trackersLabel = new Text("Trackers");
 		var input_stream_uriLabel = new Text("Input stream URL");
 		var instance_typeLabel = new Text("Instance Type");
 		var resolutionLabel = new Text("Resolution");
+		var idLabel = new Text();
 		var holder = new FlowPanel();
 		var buttonHolder = new HorizontalPanel();
 		var deleteButton = new BonBonButton("Delete", function() {
@@ -306,17 +311,14 @@ var BroadcastCard = FlowPanel.extend({
 		nr_of_boosters.setAttributes({placeholder:"0", data:"nr_of_boosters"}).setText(data.nr_of_boosters);
 		nr_of_trackers.setAttributes({placeholder:"1", data:"nr_of_trackers"}).setText(data.nr_of_trackers);
 		instance_type.setAttributes({placeholder:"t1.micro", data:"instance_type"}).setText(data.instance_type);
-		holder.setStyleName("swarms-holder");
+		holder.setStyleName("swarms-card");
+		created_at.setText(data.created_at);
+		updated_at.setText(data.updated_at);
 		buttonHolder.setStyleName("swarm-button-holder");
 		deleteButton.setStyleName("bbCard bbPink");
 		saveButton.setStyleName("bbCard bbGreen");
 		errorText.setStyleName("error-text");
-		instance_typeLabel.setStyleName("align-right");
-		input_stream_uriLabel.setStyleName("align-right");
-		nr_of_sourcesLabel.setStyleName("align-right");
-		nr_of_boostersLabel.setStyleName("align-right");
-		nr_of_trackersLabel.setStyleName("align-right");
-		resolutionLabel.setStyleName("align-right");
+		idLabel.setStyleName("id-label").setText(data.id);
 		
 		buttonHolder.add(saveButton);
 		buttonHolder.add(deleteButton);
@@ -333,8 +335,13 @@ var BroadcastCard = FlowPanel.extend({
 		grid.setWidget(4,1,nr_of_boosters);
 		grid.setWidget(5,0,nr_of_trackersLabel);
 		grid.setWidget(5,1,nr_of_trackers);
+		grid.setWidget(6,0,created_atLabel);
+		grid.setWidget(6,1,created_at);
+		grid.setWidget(7,0,update_atLabel);
+		grid.setWidget(7,1,updated_at);
 
 		holder.add(errorText);
+		holder.add(idLabel);
 		holder.add(buttonHolder);
 		holder.add(grid);
 
