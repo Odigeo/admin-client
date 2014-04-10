@@ -249,20 +249,23 @@ var BroadcastCard = FlowPanel.extend({
 
 		return holder;
 	},
-	render_swarm: function(data, resolution) {
+	render_swarm: function(data, resolution_value) {
 		if(!data) {
 			data = {};
 		}
-		var grid = new FormGrid(5,3)
-		var header = new TextBox();
+		var grid = new FormGrid(6,2)
+		var resolution = new TextBox();
 		var input_stream_uri = new TextBox();
 		var instance_type = new TextBox();
 		var nr_of_sources = new TextBox();
 		var nr_of_boosters = new TextBox();
 		var nr_of_trackers = new TextBox();
-		var sources = new Text("# of Sources");
-		var boosters = new Text("# of Boosters");
-		var trackers = new Text("# of Trackers");
+		var nr_of_sourcesLabel = new Text("Sources");
+		var nr_of_boostersLabel = new Text("Boosters");
+		var nr_of_trackersLabel = new Text("Trackers");
+		var input_stream_uriLabel = new Text("Input stream URL");
+		var instance_typeLabel = new Text("Instance Type");
+		var resolutionLabel = new Text("Resolution");
 		var holder = new FlowPanel();
 		var buttonHolder = new HorizontalPanel();
 		var deleteButton = new BonBonButton("Delete", function() {
@@ -297,30 +300,39 @@ var BroadcastCard = FlowPanel.extend({
 		var errorText = new Text("");
 
 		grid.setStyleName("card-input-grid");
-		header.setAttributes({placeholder:"Resolution", data:"resolution"}).setText(resolution).setStyleName("align-center");
-		input_stream_uri.setAttributes({placeholder:"Input URL", data:"input_stream_uri"}).setStyleName("input-full-row align-center").setText(data.input_stream_uri);
-		nr_of_sources.setAttributes({placeholder:"#", data:"nr_of_sources"}).setText(data.nr_of_sources).setStyleName("align-center");
-		nr_of_boosters.setAttributes({placeholder:"#", data:"nr_of_boosters"}).setText(data.nr_of_boosters).setStyleName("align-center");
-		nr_of_trackers.setAttributes({placeholder:"#", data:"nr_of_trackers"}).setText(data.nr_of_trackers).setStyleName("align-center");
-		instance_type.setAttributes({placeholder:"Instance type", data:"instance_type"}).setText(data.instance_type).setStyleName("align-center");
+		resolution.setAttributes({placeholder:"Resolution", data:"resolution"}).setText(resolution_value);
+		input_stream_uri.setAttributes({placeholder:"http://10.0.0.116:8090", data:"input_stream_uri"}).setText(data.input_stream_uri);
+		nr_of_sources.setAttributes({placeholder:"1", data:"nr_of_sources"}).setText(data.nr_of_sources);
+		nr_of_boosters.setAttributes({placeholder:"0", data:"nr_of_boosters"}).setText(data.nr_of_boosters);
+		nr_of_trackers.setAttributes({placeholder:"1", data:"nr_of_trackers"}).setText(data.nr_of_trackers);
+		instance_type.setAttributes({placeholder:"t1.micro", data:"instance_type"}).setText(data.instance_type);
 		holder.setStyleName("swarms-holder");
 		buttonHolder.setStyleName("swarm-button-holder");
 		deleteButton.setStyleName("bbCard bbPink");
 		saveButton.setStyleName("bbCard bbGreen");
 		errorText.setStyleName("error-text");
+		instance_typeLabel.setStyleName("align-right");
+		input_stream_uriLabel.setStyleName("align-right");
+		nr_of_sourcesLabel.setStyleName("align-right");
+		nr_of_boostersLabel.setStyleName("align-right");
+		nr_of_trackersLabel.setStyleName("align-right");
+		resolutionLabel.setStyleName("align-right");
 		
 		buttonHolder.add(saveButton);
 		buttonHolder.add(deleteButton);
-		
-		grid.setWidget(0,1,header);
-		grid.setWidget(1,0,input_stream_uri, 3);
+
+		grid.setWidget(0,0,resolutionLabel);
+		grid.setWidget(0,1,resolution);
+		grid.setWidget(1,0,input_stream_uriLabel);
+		grid.setWidget(1,1,input_stream_uri);
+		grid.setWidget(2,0,instance_typeLabel);
 		grid.setWidget(2,1,instance_type);
-		grid.setWidget(3,0,sources);
-		grid.setWidget(3,1,boosters);
-		grid.setWidget(3,2,trackers);
-		grid.setWidget(4,0,nr_of_sources);
+		grid.setWidget(3,0,nr_of_sourcesLabel);
+		grid.setWidget(3,1,nr_of_sources);
+		grid.setWidget(4,0,nr_of_boostersLabel);
 		grid.setWidget(4,1,nr_of_boosters);
-		grid.setWidget(4,2,nr_of_trackers);
+		grid.setWidget(5,0,nr_of_trackersLabel);
+		grid.setWidget(5,1,nr_of_trackers);
 
 		holder.add(errorText);
 		holder.add(buttonHolder);
