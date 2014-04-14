@@ -262,12 +262,14 @@ var BroadcastCard = FlowPanel.extend({
 	},
 	render_swarm: function(data, resolution_value) {
 		if(!data) {
+			// Makes it easy to handle setText when you created empty card and dont have any data from API
 			data = {};
 		}
-		var grid = new FormGrid(9,2)
+
+		// Evaluation inputs
 		var resolution = new TextBox(function() {
 			var value = $(this.getElement()).val();
-			if(value.search("x") > -1) {
+			if(value.search(/x/) > -1) {
 				return true;
 			}
 			return false;
@@ -281,7 +283,8 @@ var BroadcastCard = FlowPanel.extend({
 		});
 		var instance_type = new TextBox(function() {
 			var value = $(this.getElement()).val();
-			if(value.search(".") > -1) {
+			// Just check if we got a dot at the right position: m1.small
+			if(value.search(/\./) === 2) {
 				return true;
 			}
 			return false;
@@ -307,6 +310,31 @@ var BroadcastCard = FlowPanel.extend({
 			}
 			return false;
 		});
+		var app = new TextBox(function() {
+			var value = $(this.getElement()).val();
+			if(value.length < 255) {
+				return true;
+			}
+			return false;
+		});
+		var context = new TextBox(function() {
+			var value = $(this.getElement()).val();
+			if(value.length < 255) {
+				return true;
+			}
+			return false;
+		});
+		var bitrate = new TextBox(function() {
+			// SE team want no pushing to set this value, because if omitted they will make a guess
+			// Setting this too wrong can be bad for clients using it
+			return true;
+			/*
+			var value = $(this.getElement()).val();
+			if(typeof value === "number") {
+				return true;
+			}
+			return false;*/
+		});
 		var created_at = new Text();
 		var updated_at = new Text();
 		var created_atLabel = new Text("Created at");
@@ -318,6 +346,9 @@ var BroadcastCard = FlowPanel.extend({
 		var instance_typeLabel = new Text("Instance Type");
 		var resolutionLabel = new Text("Resolution");
 		var idLabel = new Text();
+		var appLabel = new Text("App");
+		var contextLabel = new Text("Context");
+		var bitrateLabel = new Text("Bitrate");
 		var holder = new FlowPanel();
 		var buttonHolder = new HorizontalPanel();
 		var deleteButton = new BonBonButton("Delete", function() {
@@ -340,10 +371,12 @@ var BroadcastCard = FlowPanel.extend({
 			// PAPI save
 		}, "✓");
 		var errorText = new Text("");
+		var grid = new FormGrid(12,2)
 
 		$(saveButton.getElement()).attr("name", "save").attr("type","submit");
 		$(deleteButton.getElement()).attr("name", "cancel").attr("type","button");
 
+		// When saving we will loop thru all inputs mapping its data attribute value against the resource attributes, so data must be same as attribute name in resource
 		grid.setStyleName("card-input-grid");
 		resolution.setAttributes({placeholder:"Resolution", data:"resolution", errormessage:"Must be following syntax: 1024x768"}).setText(resolution_value);
 		input_stream_uri.setAttributes({placeholder:"http://10.0.0.116:8090", data:"input_stream_uri", errormessage:"Must be a valid HTTP URL"}).setText(data.input_stream_uri);
@@ -351,6 +384,9 @@ var BroadcastCard = FlowPanel.extend({
 		nr_of_boosters.setAttributes({placeholder:"0", data:"nr_of_boosters", errormessage:"Boosters are optional"}).setText(data.nr_of_boosters);
 		nr_of_trackers.setAttributes({placeholder:"1", data:"nr_of_trackers", errormessage:"Must be at least 1 tracker"}).setText(data.nr_of_trackers);
 		instance_type.setAttributes({placeholder:"t1.micro", data:"instance_type", errormessage:"Must be a valid Amazon instance type"}).setText(data.instance_type);
+		app.setAttributes({placeholder:"company", data:"app", errormessage:"Any type of 255 char string is allowed"}).setText(data.app);
+		context.setAttributes({placeholder:"cathegory", data:"context", errormessage:"Any type of 255 char string is allowed"}).setText(data.context);
+		bitrate.setAttributes({placeholder:"1500 (unit kbps)", data:"context", errormessage:"Supply the integer value in kbps"}).setText(data.bitrate);
 		holder.setStyleName("swarms-card");
 		created_at.setText(data.created_at);
 		updated_at.setText(data.updated_at);
@@ -403,17 +439,23 @@ var BroadcastCard = FlowPanel.extend({
 		grid.setWidget(1,1,input_stream_uri);
 		grid.setWidget(2,0,instance_typeLabel);
 		grid.setWidget(2,1,instance_type);
-		grid.setWidget(3,0,nr_of_sourcesLabel);
-		grid.setWidget(3,1,nr_of_sources);
-		grid.setWidget(4,0,nr_of_boostersLabel);
-		grid.setWidget(4,1,nr_of_boosters);
-		grid.setWidget(5,0,nr_of_trackersLabel);
-		grid.setWidget(5,1,nr_of_trackers);
-		grid.setWidget(6,0,created_atLabel);
-		grid.setWidget(6,1,created_at);
-		grid.setWidget(7,0,update_atLabel);
-		grid.setWidget(7,1,updated_at);
-		grid.setWidget(8,0,buttonHolder);
+		grid.setWidget(3,0,appLabel);
+		grid.setWidget(3,1,app);
+		grid.setWidget(4,0,contextLabel);
+		grid.setWidget(4,1,context);
+		grid.setWidget(5,0,bitrateLabel);
+		grid.setWidget(5,1,bitrate);
+		grid.setWidget(6,0,nr_of_sourcesLabel);
+		grid.setWidget(6,1,nr_of_sources);
+		grid.setWidget(7,0,nr_of_boostersLabel);
+		grid.setWidget(7,1,nr_of_boosters);
+		grid.setWidget(8,0,nr_of_trackersLabel);
+		grid.setWidget(8,1,nr_of_trackers);
+		grid.setWidget(9,0,created_atLabel);
+		grid.setWidget(9,1,created_at);
+		grid.setWidget(10,0,update_atLabel);
+		grid.setWidget(10,1,updated_at);
+		grid.setWidget(11,0,buttonHolder);
 
 		holder.add(errorText);
 		holder.add(idLabel);
