@@ -133,6 +133,11 @@ var BroadcastCard = FlowPanel.extend({
 			if(confirm("This will permanently delete this Broadcast resource along with its Swarm resources!!")) {
 				// User clicked Yes
 				console.log("Deleting Broadcast and swarms");
+				if(!self.data.name) {
+					// An empty card from Create Broadcast is deleted, just refresh the list
+					content.ip.onSearch();
+					return;
+				}
 				self.loader.show();
 				// Delete all Swarm resources
 				for(var key in self.data.swarms) {
@@ -157,7 +162,6 @@ var BroadcastCard = FlowPanel.extend({
 					console.warn("Failed to delete Broadcast");
 					self.loader.hide();
 				});
-				
 			}
 		}, "✗");
 		var saveButton = new BonBonButton("Save", function() {
