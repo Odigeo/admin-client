@@ -277,7 +277,7 @@ var BroadcastCard = FlowPanel.extend({
 		});
 		var instance_type = new TextBox(function() {
 			var value = $(this.getElement()).val();
-			if(value.search(".")) {
+			if(value.search(".") > -1) {
 				return true;
 			}
 			return false;
