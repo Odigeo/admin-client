@@ -398,7 +398,7 @@ var BroadcastCard = FlowPanel.extend({
 		instance_type.setAttributes({placeholder:"t1.micro", data:"instance_type", errormessage:"Must be a valid Amazon instance type"}).setText(data.instance_type);
 		app.setAttributes({placeholder:"company", data:"app", errormessage:"Any type of 255 char string is allowed"}).setText(data.app);
 		context.setAttributes({placeholder:"cathegory", data:"context", errormessage:"Any type of 255 char string is allowed"}).setText(data.context);
-		bitrate.setAttributes({placeholder:"1500 (unit kbps)", data:"context", errormessage:"Supply the integer value in kbps"}).setText(data.bitrate);
+		bitrate.setAttributes({placeholder:"1500 (unit kbps)", data:"bitrate", errormessage:"Supply the integer value in kbps"}).setText(data.bitrate);
 		swarm_id.setText(data.swarm_id);
 		holder.setStyleName("swarms-card");
 		created_at.setText(data.created_at);
