@@ -72,6 +72,11 @@ body {
 	padding: 2px 5px 2px 5px;
 	border-radius: 10px;
 	background-color: rgba(0,0,0,0.0);
+	line-height: 17px;
+}
+
+.card-input-grid td {
+	width: 160px;
 }
 
 .card-input-grid td div {
@@ -80,6 +85,34 @@ body {
 	font-size: 14px;
 	margin: 2px 5px 2px 5px;
 	padding: 2px 5px 2px 5px;
+}
+
+.card-header-input-grid {
+	margin: 20px 0px 0px 0px;
+}
+
+.card-header-input-grid input {
+	margin: 2px 5px 2px 5px;
+	width: 160px;
+	font-size: 14px;
+	padding: 2px 5px 2px 5px;
+	border-radius: 10px;
+	background-color: rgba(0,0,0,0.0);
+	float: left;
+	line-height: 17px;
+}
+
+.card-header-input-grid td {
+	
+}
+
+.card-header-input-grid td div {
+	width: 160px;
+	text-align: right;
+	font-size: 14px;
+	margin: 2px 5px 2px 5px;
+	padding: 0px 5px 3px 5px;
+	float: right;
 }
 
 .input-full-row {

@@ -122,9 +122,12 @@ var BroadcastCard = FlowPanel.extend({
 	},
 	render_broadcast: function() {
 		var self = this;
-		var grid = new FormGrid(2,1);
-		var nameI = new TextBox();
-		var descriptionI = new TextBox();
+		var name = new TextBox();
+		var description = new TextBox();
+		var app = new TextBox();
+		var context = new TextBox();
+		var appLabel = new Text("App");
+		var contextLabel = new Text("Context");
 		var holder = new FlowPanel();
 		var buttonHolder = new HorizontalPanel();
 		var errorText = new Text("");
@@ -231,10 +234,13 @@ var BroadcastCard = FlowPanel.extend({
 			// Open Swarms section
 			self.swarms_holder.setHeight("100%");
 		}, "✓");
+		var grid = new FormGrid(4,2);
 
-		grid.setStyleName("card-input-grid");
-		nameI.setAttributes({placeholder:"Name", data:"name"}).setText(this.data.name).setStyleName("input-full-card textBlue align-center textLarge");
-		descriptionI.setAttributes({placeholder:"Description", data:"description"}).setText(this.data.description).setStyleName("input-full-card align-center");
+		grid.setStyleName("card-header-input-grid");
+		name.setAttributes({placeholder:"Name", data:"name"}).setText(this.data.name).setStyleName("input-full-card textBlue align-center textLarge");
+		description.setAttributes({placeholder:"Description", data:"description"}).setText(this.data.description).setStyleName("input-full-card align-center");
+		app.setAttributes({placeholder:"app", data:"app"}).setText(this.data.app).setStyleName("align-left");
+		context.setAttributes({placeholder:"context", data:"context"}).setText(this.data.context).setStyleName("align-left");
 		buttonHolder.setStyleName("broadcast-button-holder");
 		deleteButton.setStyleName("bbCard bbPink");
 		saveButton.setStyleName("bbCard bbGreen");
@@ -249,8 +255,12 @@ var BroadcastCard = FlowPanel.extend({
 		buttonHolder.add(saveButton);
 		buttonHolder.add(deleteButton);
 
-		grid.setWidget(0,0,nameI);
-		grid.setWidget(1,0,descriptionI);
+		grid.setWidget(0,0,name,2);
+		grid.setWidget(1,0,description,2);
+		grid.setWidget(2,0,appLabel);
+		grid.setWidget(2,1,app);
+		grid.setWidget(3,0,contextLabel);
+		grid.setWidget(3,1,context);
 
 		holder.add(errorText);
 		holder.add(buttonHolder);
