@@ -345,6 +345,7 @@ var BroadcastCard = FlowPanel.extend({
 			}
 			return false;*/
 		});
+		var swarm_id = new Text("", true); // add word wrap since long string
 		var created_at = new Text();
 		var updated_at = new Text();
 		var created_atLabel = new Text("Created at");
@@ -359,6 +360,7 @@ var BroadcastCard = FlowPanel.extend({
 		var appLabel = new Text("App");
 		var contextLabel = new Text("Context");
 		var bitrateLabel = new Text("Bitrate");
+		var swarm_idLabel = new Text("Swarm Id");
 		var holder = new FlowPanel();
 		var buttonHolder = new HorizontalPanel();
 		var deleteButton = new BonBonButton("Delete", function() {
@@ -381,7 +383,7 @@ var BroadcastCard = FlowPanel.extend({
 			// PAPI save
 		}, "✓");
 		var errorText = new Text("");
-		var grid = new FormGrid(12,2)
+		var grid = new FormGrid(13,2)
 
 		$(saveButton.getElement()).attr("name", "save").attr("type","submit");
 		$(deleteButton.getElement()).attr("name", "cancel").attr("type","button");
@@ -397,6 +399,7 @@ var BroadcastCard = FlowPanel.extend({
 		app.setAttributes({placeholder:"company", data:"app", errormessage:"Any type of 255 char string is allowed"}).setText(data.app);
 		context.setAttributes({placeholder:"cathegory", data:"context", errormessage:"Any type of 255 char string is allowed"}).setText(data.context);
 		bitrate.setAttributes({placeholder:"1500 (unit kbps)", data:"context", errormessage:"Supply the integer value in kbps"}).setText(data.bitrate);
+		swarm_id.setText(data.swarm_id);
 		holder.setStyleName("swarms-card");
 		created_at.setText(data.created_at);
 		updated_at.setText(data.updated_at);
@@ -461,11 +464,13 @@ var BroadcastCard = FlowPanel.extend({
 		grid.setWidget(7,1,nr_of_boosters);
 		grid.setWidget(8,0,nr_of_trackersLabel);
 		grid.setWidget(8,1,nr_of_trackers);
-		grid.setWidget(9,0,created_atLabel);
-		grid.setWidget(9,1,created_at);
-		grid.setWidget(10,0,update_atLabel);
-		grid.setWidget(10,1,updated_at);
-		grid.setWidget(11,0,buttonHolder);
+		grid.setWidget(9,0,swarm_idLabel);
+		grid.setWidget(9,1,swarm_id);
+		grid.setWidget(10,0,created_atLabel);
+		grid.setWidget(10,1,created_at);
+		grid.setWidget(11,0,update_atLabel);
+		grid.setWidget(11,1,updated_at);
+		grid.setWidget(12,0,buttonHolder);
 
 		holder.add(errorText);
 		holder.add(idLabel);
