@@ -364,23 +364,10 @@ var BroadcastCard = FlowPanel.extend({
 		var holder = new FlowPanel();
 		var buttonHolder = new HorizontalPanel();
 		var deleteButton = new BonBonButton("Delete", function() {
-			// Delete
-			if(confirm("This will terminate the swarm with its workers!")) {
-				// User clicked Yes
-				console.log("Deleting swarm");
-			} else {
-				// User clicked No
-			}
+			// Take care of functionality in Grids eventhandling
 		}, "✗");
 		var saveButton = new BonBonButton("Save", function() {
-			console.log("Saving swarm");
-			// Loop over all inputs for Broadcast and update self.data
-			$.map($("input", holder.getElement()), function(obj, key) {
-				var attribute = $(obj).attr("data");
-				data[attribute] = $(obj).val();
-			});
-
-			// PAPI save
+			// Take care of functionality in Grids eventhandling
 		}, "✓");
 		var errorText = new Text("");
 		var grid = new FormGrid(13,2)
