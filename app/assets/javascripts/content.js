@@ -108,19 +108,17 @@ var InstrumentPanel = FlowPanel.extend({
 	}
 });
 
-var BroadcastCard = FlowPanel.extend({
+var Broadcast = FlowPanel.extend({
 	init: function(data) {
 		this._super();
-		this.formgrids = [];
 		if(data) {
 			this.data = data;
 		} else {
 			this.data = {};
 		}
 		this.render();
-		this.setStyleName("card");
 	},
-	render_broadcast: function() {
+	render: function() {
 		var self = this;
 		var name = new TextBox();
 		var description = new TextBox();
@@ -266,16 +264,22 @@ var BroadcastCard = FlowPanel.extend({
 		holder.add(buttonHolder);
 		holder.add(grid);
 
-		this.formgrids.push(grid);
+		this.add(holder);
+	}
+});
 
-		return holder;
-	},
-	render_swarm: function(data, resolution_value) {
-		if(!data) {
-			// Makes it easy to handle setText when you created empty card and dont have any data from API
-			data = {};
+var Swarm = FlowPanel.extend({
+	init: function(data, resolution_value) {
+		this._super();
+		if(data) {
+			this.data = data;
+		} else {
+			this.data = {};
 		}
-
+		this.resolution_value = resolution_value;
+		this.render();
+	},
+	render: function() {
 		// Evaluation inputs
 		var resolution = new TextBox(function() {
 			var value = $(this.getElement()).val();
@@ -377,26 +381,26 @@ var BroadcastCard = FlowPanel.extend({
 
 		// When saving we will loop thru all inputs mapping its data attribute value against the resource attributes, so data must be same as attribute name in resource
 		grid.setStyleName("card-input-grid");
-		resolution.setAttributes({placeholder:"Resolution", data:"resolution", errormessage:"Must be following syntax: 1024x768"}).setText(resolution_value);
-		input_stream_uri.setAttributes({placeholder:"http://10.0.0.116:8090", data:"input_stream_uri", errormessage:"Must be a valid HTTP URL"}).setText(data.input_stream_uri);
-		nr_of_sources.setAttributes({placeholder:"1", data:"nr_of_sources", errormessage:"Must be at least 1 source"}).setText(data.nr_of_sources);
-		nr_of_boosters.setAttributes({placeholder:"0", data:"nr_of_boosters", errormessage:"Boosters are optional"}).setText(data.nr_of_boosters);
-		nr_of_trackers.setAttributes({placeholder:"1", data:"nr_of_trackers", errormessage:"Must be at least 1 tracker"}).setText(data.nr_of_trackers);
-		instance_type.setAttributes({placeholder:"t1.micro", data:"instance_type", errormessage:"Must be a valid Amazon instance type"}).setText(data.instance_type);
-		app.setAttributes({placeholder:"company", data:"app", errormessage:"Any type of 255 char string is allowed"}).setText(data.app);
-		context.setAttributes({placeholder:"cathegory", data:"context", errormessage:"Any type of 255 char string is allowed"}).setText(data.context);
-		bitrate.setAttributes({placeholder:"1500 (unit kbps)", data:"bitrate", errormessage:"Supply the integer value in kbps"}).setText(data.bitrate);
-		swarm_id.setText(data.swarm_id);
+		resolution.setAttributes({placeholder:"Resolution", data:"resolution", errormessage:"Must be following syntax: 1024x768"}).setText(this.resolution_value);
+		input_stream_uri.setAttributes({placeholder:"http://10.0.0.116:8090", data:"input_stream_uri", errormessage:"Must be a valid HTTP URL"}).setText(this.data.input_stream_uri);
+		nr_of_sources.setAttributes({placeholder:"1", data:"nr_of_sources", errormessage:"Must be at least 1 source"}).setText(this.data.nr_of_sources);
+		nr_of_boosters.setAttributes({placeholder:"0", data:"nr_of_boosters", errormessage:"Boosters are optional"}).setText(this.data.nr_of_boosters);
+		nr_of_trackers.setAttributes({placeholder:"1", data:"nr_of_trackers", errormessage:"Must be at least 1 tracker"}).setText(this.data.nr_of_trackers);
+		instance_type.setAttributes({placeholder:"t1.micro", data:"instance_type", errormessage:"Must be a valid Amazon instance type"}).setText(this.data.instance_type);
+		app.setAttributes({placeholder:"company", data:"app", errormessage:"Any type of 255 char string is allowed"}).setText(this.data.app);
+		context.setAttributes({placeholder:"cathegory", data:"context", errormessage:"Any type of 255 char string is allowed"}).setText(this.data.context);
+		bitrate.setAttributes({placeholder:"1500 (unit kbps)", data:"bitrate", errormessage:"Supply the integer value in kbps"}).setText(this.data.bitrate);
+		swarm_id.setText(this.data.swarm_id);
 		holder.setStyleName("swarms-card");
-		created_at.setText(data.created_at);
-		updated_at.setText(data.updated_at);
+		created_at.setText(this.data.created_at);
+		updated_at.setText(this.data.updated_at);
 		buttonHolder.setStyleName("swarm-button-holder");
 		deleteButton.setStyleName("bbCard bbPink");
 		saveButton.setStyleName("bbCard bbGreen");
 		errorText.setStyleName("error-text");
-		idLabel.setStyleName("id-label").setText(data.id);
+		idLabel.setStyleName("id-label").setText(this.data.id);
 
-		if(data.input_stream_uri) {
+		if(this.data.input_stream_uri) {
 			// Add buttons if valid swarm resource, meaning we wont add buttons when rendering card for new resource
 			// Save at Broadcast takes care of creating swarm and broadcast in correct order
 			buttonHolder.add(saveButton);
@@ -408,7 +412,7 @@ var BroadcastCard = FlowPanel.extend({
 			console.log("Valid form");
 			// Collect data
 			var data = {};
-			data.service = "api_users";
+			data.service = "api_users"; // ? should be swarms?
 			var inputs = $('input', grid.getElement());
 			for(var i=0;i<inputs.length;i++) {
 				data[inputs[i].name] = $(inputs[i]).val();
@@ -463,9 +467,21 @@ var BroadcastCard = FlowPanel.extend({
 		holder.add(idLabel);
 		holder.add(grid);
 
-		this.formgrids.push(grid);
+		this.add(holder);
+	}
+});
 
-		return holder;
+var BroadcastCard = FlowPanel.extend({
+	init: function(data) {
+		this._super();
+		this.formgrids = [];
+		if(data) {
+			this.data = data;
+		} else {
+			this.data = {};
+		}
+		this.render();
+		this.setStyleName("card");
 	},
 	render: function() {
 		var self = this;
@@ -477,7 +493,7 @@ var BroadcastCard = FlowPanel.extend({
 		this.click_header.setStyleName("swarms-click-header");
 
 		this.add(this.loader);
-		this.add(this.render_broadcast());
+		this.add(new Broadcast(this.data));
 		this.add(new Delimiter());
 		this.add(this.click_header);
 		this.add(new Delimiter());
@@ -500,7 +516,7 @@ var BroadcastCard = FlowPanel.extend({
 					// Success
 					if(res && res.swarm) {
 						// Add rendered swarm to holder
-						self.swarms_holder.add(self.render_swarm(res.swarm, extras));
+						self.swarms_holder.add(new Swarm(res.swarm, extras));
 					}
 				},
 				function(res) {
@@ -509,7 +525,7 @@ var BroadcastCard = FlowPanel.extend({
 			}
 		} else {
 			// Add an empty rendering of swarm
-			self.swarms_holder.add(self.render_swarm());
+			self.swarms_holder.add(new Swarm());
 			// Open Swarms section
 			self.swarms_holder.setHeight("100%");
 		}
