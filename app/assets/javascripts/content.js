@@ -120,6 +120,7 @@ var Broadcast = FlowPanel.extend({
 	},
 	render: function() {
 		var self = this;
+		this.loader = new WidgetLoader();
 		var name = new TextBox();
 		var description = new TextBox();
 		var app = new TextBox();
@@ -171,8 +172,8 @@ var Broadcast = FlowPanel.extend({
 				// Create new Broadcast and 1 swarm
 				var swarm_data = {};
 				// Only take first if several Swarms are present when creating
-				$.map($(".swarms-holder input", self.getElement()), function(obj, key) {
-					console.log(obj);
+				$.map($(".swarms-holder input", self.parent.getElement()), function(obj, key) {
+					//console.log(obj);
 					var attribute = $(obj).attr("data");
 					swarm_data[attribute] = $(obj).val();
 				});
@@ -180,7 +181,7 @@ var Broadcast = FlowPanel.extend({
 				PAPI.createSwarm(swarm_data, function(res) {
 					console.log("Successfully created Swarm");
 					var broadcast_data = {};
-					$.map($(".broadcast-holder input", self.getElement()), function(obj, key) {
+					$.map($(".broadcast-holder input", self.parent.getElement()), function(obj, key) {
 						var attribute = $(obj).attr("data");
 						broadcast_data[attribute] = $(obj).val();
 					});
@@ -264,6 +265,7 @@ var Broadcast = FlowPanel.extend({
 		holder.add(buttonHolder);
 		holder.add(grid);
 
+		this.add(this.loader);
 		this.add(holder);
 	}
 });
@@ -281,6 +283,7 @@ var Swarm = FlowPanel.extend({
 	},
 	render: function() {
 		// Evaluation inputs
+		this.loader = new WidgetLoader();
 		var resolution = new TextBox(function() {
 			var value = $(this.getElement()).val();
 			if(value.search(/x/) > -1) {
@@ -467,6 +470,7 @@ var Swarm = FlowPanel.extend({
 		holder.add(idLabel);
 		holder.add(grid);
 
+		this.add(this.loader);
 		this.add(holder);
 	}
 });
