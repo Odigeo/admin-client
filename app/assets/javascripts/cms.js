@@ -65,7 +65,11 @@ var TranslationObj = Class.extend({
 	},
 	getConName: function() {
 		var tmpData = this["sv-SE"] || this["no-NO"] || this["da-DK"] || this["en-GB"];
-		return tmpData.context + " " + tmpData.name;
+		if(tmpData) {
+			return tmpData.context + " " + tmpData.name;
+		} else {
+			return "";
+		}
 	},
   getHyperlink: function(rel, locale) {
 		if(!this[locale]) return undefined;
