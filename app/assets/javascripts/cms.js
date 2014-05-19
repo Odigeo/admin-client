@@ -65,7 +65,11 @@ var TranslationObj = Class.extend({
 	},
 	getConName: function() {
 		var tmpData = this["sv-SE"] || this["no-NO"] || this["da-DK"] || this["en-GB"];
-		return tmpData.context + " " + tmpData.name;
+		if(tmpData) {
+			return tmpData.context + " " + tmpData.name;
+		} else {
+			return "";
+		}
 	},
   getHyperlink: function(rel, locale) {
 		if(!this[locale]) return undefined;
@@ -683,8 +687,8 @@ var CMSObject = FlowPanel.extend({
 		});
 
 		if(this.data[this.locale] && this.data.getHyperlink("url", this.locale)) {
-			//Show current image for locale
-			this.fileArea.setImgSrc(this.data.getURL(this.locale).href);
+			// Show current image for locale
+			this.fileArea.setImgSrc(this.data[this.locale]._links.url.href);
 			this.fileArea.setMimeType(this.data[this.locale].content_type);
 			this.fileArea.setFileName(this.data[this.locale].file_name);
 			this.fileArea.setByteSize(this.data[this.locale].bytesize);

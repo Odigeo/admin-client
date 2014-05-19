@@ -45,6 +45,7 @@ LOG_HOSTS: []
 TEST_API_USER: admin_client_testuser
 TEST_API_PASSWORD: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+
 ##########################################################################################
 # This section allows you to specify values specific for a particular Rails
 # environment. Values defined here will take precedence over the default values.
