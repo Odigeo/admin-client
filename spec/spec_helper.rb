@@ -33,47 +33,46 @@ else
     config.order = "random"
   end
 
-  # Set up the user and password of the user used to log in to perform the tests
-  TEST_API_USER = ENV['TEST_API_USER'] || TEST_API_USER
-
-  tapw = ENV['TEST_API_PASSWORD'] || TEST_API_PASSWORD
-  master, staging = tapw.split(',')
-  tapw = (ENV['GIT_BRANCH'] == 'staging' ? staging : master) if staging.present?
-  TEST_API_PASSWORD = tapw
-
   # Configure Watir
   WatirWebdriverRails.host = client_host
   WatirWebdriverRails.port = client_port
   WatirWebdriverRails.close_browser_after_finish = true
+end
 
-  URL = "#{client_host}:#{client_port}"
+# Set up the user and password of the user used to log in to perform the tests
+TEST_API_USER = ENV['TEST_API_USER'] || TEST_API_USER
 
-  def setup_browser(uri)
-    if RUBY_PLATFORM =~ /linux/
-      @headless = Headless.new
-      @headless.start
-      b = Watir::Browser.start uri
-    else
-      b = Watir::Browser.new ENV["browser"] || :chrome
-      b.goto uri
-    end
+tapw = ENV['TEST_API_PASSWORD'] || TEST_API_PASSWORD
+master, staging = tapw.split(',')
+tapw = (ENV['GIT_BRANCH'] == 'staging' ? staging : master) if tapw.split(",").size > 1
+TEST_API_PASSWORD = tapw
+URL = "#{client_host}:#{client_port}"
 
-    # Make sure that window is maximized to not get viewport errors
-    screen_width = b.execute_script("return screen.width;")
-    screen_height = b.execute_script("return screen.height;")
-    b.driver.manage.window.resize_to(screen_width,screen_height)
-    b.driver.manage.window.move_to(0,0)
-    b
+def setup_browser(uri)
+  if RUBY_PLATFORM =~ /linux/
+    @headless = Headless.new
+    @headless.start
+    b = Watir::Browser.start uri
+  else
+    b = Watir::Browser.new ENV["browser"] || :chrome
+    b.goto uri
   end
 
+  # Make sure that window is maximized to not get viewport errors
+  screen_width = b.execute_script("return screen.width;")
+  screen_height = b.execute_script("return screen.height;")
+  b.driver.manage.window.resize_to(screen_width,screen_height)
+  b.driver.manage.window.move_to(0,0)
+  b
+end
 
-  def teardown_browser(browser)
-    if RUBY_PLATFORM =~ /linux/
-      #@headless.take_screenshot "miffo-#{rand(1000000000)}.jpg"
-      browser.close
-      @headless.destroy
-    else
-      browser.close
-    end
+
+def teardown_browser(browser)
+  if RUBY_PLATFORM =~ /linux/
+    #@headless.take_screenshot "miffo-#{rand(1000000000)}.jpg"
+    browser.close
+    @headless.destroy
+  else
+    browser.close
   end
 end
