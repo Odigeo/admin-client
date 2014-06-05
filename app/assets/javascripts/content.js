@@ -121,54 +121,88 @@ var Broadcast = FlowPanel.extend({
 	render: function() {
 		var self = this;
 		this.loader = new WidgetLoader();
-		var name = new TextBox();
-		var description = new TextBox();
-		var app = new TextBox();
-		var context = new TextBox();
+		var name = new TextBox(function() {
+			var value = $(this.getElement()).val();
+			if(value.length > 5) {
+				return true;
+			}
+			return false;
+		});
+		var description = new TextBox(function() {
+			var value = $(this.getElement()).val();
+			if(value.length > 7) {
+				return true;
+			}
+			return false;
+		});
+		var app = new TextBox(function() {
+			var value = $(this.getElement()).val();
+			if(value.length > 1) {
+				return true;
+			}
+			return false;
+		});
+		var price = new TextBox(function() {
+			var value = $(this.getElement()).val();
+			// Allows any number vid 2 decimals and . as delimiter
+			if(value.search(/^\$?\d+?(\.\d{2})?$/) > -1) {
+				$(this.getElement()).val(value.toUpperCase());
+				return true;
+			}
+			return false;
+		});
+		var currency = new TextBox(function() {
+			var value = $(this.getElement()).val();
+			if(value.length == 3) {
+				return true;
+			}
+			return false;
+		});
 		var appLabel = new Text("App");
-		var contextLabel = new Text("Context");
+		var priceLabel = new Text("Price");
+		var currencyLabel = new Text("Currency");
 		var holder = new FlowPanel();
 		var buttonHolder = new HorizontalPanel();
 		var errorText = new Text("");
-		var deleteButton = new BonBonButton("Delete", function() {
-			// Delete
-			if(confirm("This will permanently delete this Broadcast resource along with its Swarm resources!!")) {
-				// User clicked Yes
-				console.log("Deleting Broadcast and swarms");
-				if(!self.data.name) {
-					// An empty card from Create Broadcast is deleted, just refresh the list
-					content.ip.onSearch();
-					return;
-				}
-				self.loader.show();
-				// Delete all Swarm resources
-				for(var key in self.data.swarms) {
-					console.log("Deleting swarm: " + key);
-					var extra = key;
-					PAPI._delete(self.data.swarms[key], function(res, extra) {
-						// Success delete swarm
-						console.log("Successfully deleted swarm: " + extra);
-					},
-					function() {
-						// Failed delete swarm
-						console.log("Failed to delete swarm");
-					}, extra);
-				}
-				// Delete the Broadcast resource
-				PAPI._delete(self.data._links.self.href, function(res) {
-					console.log("Successfully deleted Broadcast");
-					// Update list
-					self.loader.hide();
-					content.ip.onSearch();
-				}, function() {
-					console.warn("Failed to delete Broadcast");
-					self.loader.hide();
-				});
-			}
-		}, "✗");
-		var saveButton = new BonBonButton("Save", function() {
+		var deleteButton = new BonBonButton("Delete", function() {/* Use Formgrids callbacks instead */}, "✗");
+		var saveButton = new BonBonButton("Save", function() {/* Use Formgrids callbacks instead */}, "✓");
+		var createSwarmButton = new BonBonButton("Create new Swarm", function() {
+			// Add an empty rendering of swarm
+			self.swarms_holder.add(self.render_swarm());
+			// Open Swarms section
+			self.swarms_holder.setHeight("100%");
+		}, "✓");
+		var grid = new FormGrid(6,2);
+
+		saveButton.setAttributes({name:"save", type:"submit"});
+		deleteButton.setAttributes({name:"cancel", type:"button"});
+
+		grid.setStyleName("card-header-input-grid");
+		name.setAttributes({placeholder:"Name", data:"name", errormessage:"Must be at least 6 characters long."}).setText(this.data.name).setStyleName("input-full-card textBlue align-center textLarge");
+		description.setAttributes({placeholder:"Description", data:"description", errormessage:"Must be at least 8 characters long."}).setText(this.data.description).setStyleName("input-full-card align-center");
+		app.setAttributes({placeholder:"app", data:"app", errormessage:"Must be at least 2 character long."}).setText(this.data.app).setStyleName("align-left");
+		price.setAttributes({placeholder:"0", data:"price", errormessage:"Allows any positive number with 2 decimals for cents, e.g. 2.25"}).setText(this.data.price).setStyleName("align-left");
+		currency.setAttributes({placeholder:"USD", data:"currency", errormessage:"Currency must be 3 letter ISO code, e.g. USD or EUR"}).setText(this.data.currency).setStyleName("align-left");
+		buttonHolder.setStyleName("broadcast-button-holder");
+		deleteButton.setStyleName("bbCard bbPink");
+		saveButton.setStyleName("bbCard bbGreen");
+		holder.setStyleName("u20 broadcast-holder");
+		createSwarmButton.setStyleName("bbCard bbGreen right");
+		errorText.setStyleName("error-text");
+
+		if(self.data.name) {
+			// Only render create new additional swarm button when rendering broadcast resource from API
+			buttonHolder.add(createSwarmButton);
+		}
+		buttonHolder.add(saveButton);
+		buttonHolder.add(deleteButton);
+
+		grid.addOnSave(function(form,event){
+			// Valid form do PAPI call
+			console.log("Valid form");
 			self.loader.show();
 			if(!self.data.name) {
+				// POST
 				// Create new Broadcast and 1 swarm
 				var swarm_data = {};
 				// Only take first if several Swarms are present when creating
@@ -208,6 +242,7 @@ var Broadcast = FlowPanel.extend({
 				});
 			} else {
 				console.log("Saving Broadcast");
+				// PUT
 				// Update self.data from inputs
 				// Loop over all inputs for Broadcast and update self.data
 				$.map($("input", holder.getElement()), function(obj, key) {
@@ -220,49 +255,70 @@ var Broadcast = FlowPanel.extend({
 					// Update list
 					self.loader.hide();
 					content.ip.onSearch();
-				}, function(xhr, textStatus) {
+				}, function(response) {
 					console.warn("Failed to save Broadcast");
-					errorText.setText("textStatus");
+					if(response.xhr.status == 422) {
+						// Unprocessable Entity
+						errorText.setText(response.errorText[0]);
+					}
 					self.loader.hide();
 				});
 			}
-		}, "✓");
-		var createSwarmButton = new BonBonButton("Create new Swarm", function() {
-			// Add an empty rendering of swarm
-			self.swarms_holder.add(self.render_swarm());
-			// Open Swarms section
-			self.swarms_holder.setHeight("100%");
-		}, "✓");
-		var grid = new FormGrid(4,2);
 
-		grid.setStyleName("card-header-input-grid");
-		name.setAttributes({placeholder:"Name", data:"name"}).setText(this.data.name).setStyleName("input-full-card textBlue align-center textLarge");
-		description.setAttributes({placeholder:"Description", data:"description"}).setText(this.data.description).setStyleName("input-full-card align-center");
-		app.setAttributes({placeholder:"app", data:"app"}).setText(this.data.app).setStyleName("align-left");
-		context.setAttributes({placeholder:"context", data:"context"}).setText(this.data.context).setStyleName("align-left");
-		buttonHolder.setStyleName("broadcast-button-holder");
-		deleteButton.setStyleName("bbCard bbPink");
-		saveButton.setStyleName("bbCard bbGreen");
-		holder.setStyleName("u20 broadcast-holder");
-		createSwarmButton.setStyleName("bbCard bbGreen right");
-		errorText.setStyleName("error-text");
+		});
 
-		if(self.data.name) {
-			// Only render create new additional swarm button when rendering broadcast resource from API
-			buttonHolder.add(createSwarmButton);
-		}
-		buttonHolder.add(saveButton);
-		buttonHolder.add(deleteButton);
+		grid.addOnCancel(function(form,event){
+			// Delete
+			if(confirm("This will permanently delete this Broadcast resource along with its Swarm resources!!")) {
+				// User clicked Yes
+				console.log("Deleting Broadcast and swarms");
+				if(!self.data.name) {
+					// An empty card from Create Broadcast is deleted, just refresh the list
+					content.ip.onSearch();
+					return;
+				}
+				self.loader.show();
+				// Delete all Swarm resources
+				for(var key in self.data.swarms) {
+					console.log("Deleting swarm: " + key);
+					var extra = key;
+					PAPI._delete(self.data.swarms[key], function(res, extra) {
+						// Success delete swarm
+						console.log("Successfully deleted swarm: " + extra);
+					},
+					function() {
+						// Failed delete swarm
+						console.log("Failed to delete swarm");
+					}, extra);
+				}
+				// Delete the Broadcast resource
+				PAPI._delete(self.data._links.self.href, function(res) {
+					console.log("Successfully deleted Broadcast");
+					// Update list
+					self.loader.hide();
+					content.ip.onSearch();
+				}, function(response) {
+					console.warn("Failed to delete Broadcast");
+					if(response.errorText && response.errorText === "object") {
+						errorText.setText(response.errorText[0]);
+					}
+					self.loader.hide();
+				});
+			}
+		});
 
 		grid.setWidget(0,0,name,2);
 		grid.setWidget(1,0,description,2);
 		grid.setWidget(2,0,appLabel);
 		grid.setWidget(2,1,app);
-		grid.setWidget(3,0,contextLabel);
-		grid.setWidget(3,1,context);
+		grid.setWidget(3,0,priceLabel);
+		grid.setWidget(3,1,price);
+		grid.setWidget(4,0,currencyLabel);
+		grid.setWidget(4,1,currency);
+		grid.setWidget(5,1, buttonHolder);
 
 		holder.add(errorText);
-		holder.add(buttonHolder);
+		//holder.add(buttonHolder);
 		holder.add(grid);
 
 		this.add(this.loader);
