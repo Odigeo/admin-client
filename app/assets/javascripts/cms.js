@@ -319,10 +319,10 @@ var FlipConsole = FlowPanel.extend({
 		clearB.setId("flip-clear-button");
 		clearB.setStyleName("bbPink bbSmall");
 
-		var errorLabel = new Label(" ", true);
-		errorLabel.setStyleName("error-text flip-console-error-label");
+		var errorText = new Text(" ", true);
+		errorText.setStyleName("error-text flip-console-error-label");
 
-		buttonHolder.add(errorLabel);
+		buttonHolder.add(errorText);
 		buttonHolder.add(clearB);
 		buttonHolder.add(saveB);
 
@@ -402,10 +402,10 @@ var FlipConsole = FlowPanel.extend({
 		clearB.setId("flip-clear-button");
 		clearB.setStyleName("bbPink bbSmall");
 
-		var errorLabel = new Label(" ", true);
-		errorLabel.setStyleName("error-text flip-console-error-label");
+		var errorText = new Text(" ", true);
+		errorText.setStyleName("error-text flip-console-error-label");
 
-		buttonHolder.add(errorLabel);
+		buttonHolder.add(errorText);
 		buttonHolder.add(clearB);
 		buttonHolder.add(saveB);
 
@@ -453,10 +453,10 @@ var FlipConsole = FlowPanel.extend({
 		clearB.setId("flip-clear-button");
 		clearB.setStyleName("bbPink bbSmall");
 
-		var errorLabel = new Label(" ", true);
-		errorLabel.setStyleName("error-text flip-console-error-label");
+		var errorText = new Text(" ", true);
+		errorText.setStyleName("error-text flip-console-error-label");
 
-		buttonHolder.add(errorLabel);
+		buttonHolder.add(errorText);
 		buttonHolder.add(clearB);
 		buttonHolder.add(saveB);
 
@@ -501,10 +501,10 @@ var FlipConsole = FlowPanel.extend({
 		clearB.setId("flip-clear-button");
 		clearB.setStyleName("bbPink bbSmall");
 
-		var errorLabel = new Label(" ", true);
-		errorLabel.setStyleName("error-text flip-console-error-label");
+		var errorText = new Text(" ", true);
+		errorText.setStyleName("error-text flip-console-error-label");
 
-		buttonHolder.add(errorLabel);
+		buttonHolder.add(errorText);
 		buttonHolder.add(clearB);
 		buttonHolder.add(saveB);
 
@@ -523,7 +523,7 @@ var FlipConsole = FlowPanel.extend({
 		var imageB = new GradientButton("Image", function(){self.choice = 'image'; self.dp.fadeToWidget(3);});
 		var markdownB = new GradientButton("Markdown", function(){self.choice = 'markdown'; self.dp.fadeToWidget(4);});
 
-		var createL = new Label("Create item");
+		var createL = new Text("Create item");
 
 		fp.add(createL);
 		fp.add(linkB);
@@ -700,12 +700,12 @@ var CMSObject = FlowPanel.extend({
 		this.add(this.tagsI);
 	},
 	render: function() {
-		var nameLabel = new Label(this.locale);
-		this.statusL = new Label();
+		var nameText = new Text(this.locale);
+		this.statusL = new Text();
 
 		this.statusL.setStyleName("cms-object-status error-text");
-		nameLabel.setStyleName("padding10 relief-shadow");
-		this.add(nameLabel);
+		nameText.setStyleName("padding10 relief-shadow");
+		this.add(nameText);
 
 		if(this.data) {
 			switch(this.data.usage()) {
@@ -834,10 +834,10 @@ var CMSCardPanel = FlowPanel.extend({
 	},
 	render: function() {
 		var self = this;
-		var header = new Label(this.translations.getConName());
+		var header = new Text(this.translations.getConName());
 		var holder = new HorizontalPanel();
 		var closeHolder = new FlowPanel();
-		//var closeLabel = new Label("Close");
+		//var closeText = new Text("Close");
 		var closeB = new GradientButton("X", function(){self.setStyleName("cms-card-animation");});
 		var deleteB = new BonBonButton("Delete", function(){
 			var confirm = window.confirm("This will permanently delete object!");
@@ -851,11 +851,11 @@ var CMSCardPanel = FlowPanel.extend({
 		$(deleteB.getElement()).attr('task', 'delete');
 
 		closeB.setStyleName("closeButton right");
-		//closeLabel.setStyleName("close-label right");
+		//closeText.setStyleName("close-label right");
 		closeHolder.setStyleName("close-holder");
 		header.setStyleName("padding10 large strong relief-shadow");
 		closeHolder.add(closeB);
-		//closeHolder.add(closeLabel);
+		//closeHolder.add(closeText);
 		this.add(closeHolder);
 		this.add(header);
 
@@ -936,7 +936,7 @@ var InstrumentPanel = FlowPanel.extend({
 		var holder = new HorizontalPanel();
 		var flip = new FlipConsole();
 		var createB = new BonBonButton("Create item",  function(){self.onCreate(flip);}, "✎");
-		var selectL = new Label("Select");
+		var selectL = new Text("Select");
 
 		selectL.setStyleName("relief-shadow d5 l10");
 		createB.setStyleName("bbSmall");
