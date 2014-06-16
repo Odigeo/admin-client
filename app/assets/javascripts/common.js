@@ -220,6 +220,10 @@ var PAPI = PAPIBase.extend({
     var link = this.api_domain() + "/" + this.api_version("broadcast_version") + "/broadcasts/";
     this.apiCall(link, data, "POST", success, error, this.getHeaders(), extras);
   },
+  createRight: function(right_link, data, success, error, extras) {
+    // right_link should be the rights link of a resource object that you want to create the right for, according to documentation
+    this.apiCall(right_link, data, "POST", success, error, this.getHeaders(), extras);
+  },
   connect: function(link1, link2, success, error) {
     link1 += '?href=' + encodeURI(link2);
     this.apiCall(link1, {}, "PUT", success, error, this.getHeaders());

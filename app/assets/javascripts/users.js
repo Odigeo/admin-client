@@ -1225,9 +1225,12 @@ var CreateBox = FlowPanel.extend({
 		var header = new Header2("Create a new Right");
 
 		// User special label inputs
-		var nameL = new Text("Name");
+		var resourceL = new Text("Resource");
+		var appL = new Text("App");
+		var contextL = new Text("Context");
 		var descriptionL = new Text("Description");
-		var nameI = new TextBox(function() {
+
+		var resourceI = new TextBox(function() {
 			// Validation
 			var value = $(this.getElement()).val();
 			if(value) {
@@ -1235,50 +1238,117 @@ var CreateBox = FlowPanel.extend({
 			} else {
 				return false;
 			}
+		});
+		var appI = new TextBox(function() {
+			// Validation
+			var value = $(this.getElement()).val();
+			if(value.length > 2) {
+				return true;
+			} else {
+				return false;
+			}
+		});
+		var contextI = new TextBox(function() {
+			return true;
 		});
 		var descriptionI = new TextBox(function() {
 			// Validation
 			var value = $(this.getElement()).val();
-			if(value) {
+			if(value.length > 7) {
 				return true;
 			} else {
 				return false;
 			}
 		});
 
-		nameL.setStyleName("align-right");
+		resourceL.setStyleName("align-right");
+		appL.setStyleName("align-right");
+		contextL.setStyleName("align-right");
 		descriptionL.setStyleName("align-right");
 
-		$(nameI.getElement()).attr('errorMessage', 'Enter a name of this item!').attr('name', 'username').attr('autofocus', 'on');
-		$(descriptionI.getElement()).attr('errorMessage', 'Enter a description!').attr('name', 'realname');
+		resourceI.setAttributes({'errorMessage':'Enter a resource name using the pluralis name!', 'name':'resource', 'autofocus':'on'});
+		appI.setAttributes({'errorMessage':'Needs to be at least 3 characters in length!', 'name':'app'});
+		contextI.setAttributes({'name':'context'});
+		descriptionI.setAttributes({'errorMessage':'Enter a description with at least 8 characters!', 'name':'description'});
 
-		var grid = new FormGrid(3, 2);
+		var grid = new FormGrid(5, 2);
 		grid.setStyleName("create-grid");
 		$(grid.getElement()).attr('autocomplete', 'on');
 		
-		grid.addOnSave(function(form,event){
+		grid.addOnSave(function(form,event) {
 			// Valid form do PAPI call
 			console.log("Valid form");
-			// Collect data
+			// Collect data for right object
 			var data = {};
 			data.service = "rights";
+			var resource_data = {};
+			resource_data.service = "resources";
+
 			var inputs = $('input', grid.getElement());
 			for(var i=0;i<inputs.length;i++) {
-				data[inputs[i].name] = $(inputs[i]).val();
+				if(inputs[i].name !== "resource") { // Data for the created right
+					data[inputs[i].name] = $(inputs[i]).val();
+				} else if(inputs[i].name === "resource") { // Argument data for GET the resource that we will create right for
+					resource_data["name"] = $(inputs[i]).val();
+				}
 			}
-			// Create
+			// Add * to context if it was not given
+			if(data['context'] === "") {
+				data['context'] = "*";
+			}
+
 			self.loader.show();
-			PAPI._create(data, function(res) {
-				console.log("Created Right");
-				window.rights.refresh();
-				form.clearAll();
+			// GET resource object that we will use to create rights for
+			console.log(resource_data);
+			console.log(data);
+			PAPI._get(resource_data, function(res) {
+				// Success
+				// Check if we got only 1 resource in collection since we used the query param "name" to select a specific one
+				// AND that it is a "resource" object
+				if(res["_collection"]["count"] === 1 && res["_collection"]["resources"][0]["resource"]) {
+					// We create only the right resource for GET currently
+					data["verb"] = "GET";
+					data["hyperlink"] = "self";
+					// Create rights for the selected resource
+					var resource_right_link = res["_collection"]["resources"][0]["resource"]["_links"]["rights"]["href"];
+					PAPI.createRight(resource_right_link, data, function(res) {
+						// Success
+						console.log("Successfully created right resource for " + resource_data["name"]);
+						console.log(res);
+						self.loader.hide();
+						self.hide();
+						window.rights.refresh();
+					},
+					function(res) {
+						// Failed
+						console.log(res);
+						self.loader.hide();
+						self.hide();
+					});					
+				} else {
+					// Error - Could not select the specific resource
+				}
+				console.log(res);
 				self.loader.hide();
-				self.hide();
 			},
 			function(res) {
 				// Failed
 				self.loader.hide();
+				self.hide();
 			});
+
+			// POST to create rights
+			// PAPI._create(data, function(res) {
+			// 	console.log("Created Right");
+			// 	window.rights.refresh();
+			// 	form.clearAll();
+			// 	self.loader.hide();
+			// 	self.hide();
+			// },
+			// function(res) {
+			// 	// Failed
+			// 	self.loader.hide();
+			// });
 		});
 		
 		grid.addOnCancel(function(form,event){
@@ -1290,11 +1360,15 @@ var CreateBox = FlowPanel.extend({
 		fp.add(cancelB);
 		fp.add(saveB);
 
-		grid.setWidget(0,0,nameL);
-		grid.setWidget(0,1,nameI);
-		grid.setWidget(1,0,descriptionL);
-		grid.setWidget(1,1,descriptionI);
-		grid.setWidget(2,1,fp);
+		grid.setWidget(0,0,resourceL);
+		grid.setWidget(0,1,resourceI);
+		grid.setWidget(1,0,appL);
+		grid.setWidget(1,1,appI);
+		grid.setWidget(2,0,contextL);
+		grid.setWidget(2,1,contextI);
+		grid.setWidget(3,0,descriptionL);
+		grid.setWidget(3,1,descriptionI);
+		grid.setWidget(4,1,fp);
 
 		holder.add(header);
 		holder.add(grid);
