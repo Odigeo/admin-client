@@ -1223,6 +1223,7 @@ var CreateBox = FlowPanel.extend({
 		$(saveB.getElement()).attr('name', 'save').attr('type', 'submit');
 		$(cancelB.getElement()).attr('name', 'cancel').attr('type', 'button');
 		var header = new Header2("Create a new Right");
+		var errorText = new Text("");
 
 		// User special label inputs
 		var resourceL = new Text("Resource");
@@ -1265,6 +1266,7 @@ var CreateBox = FlowPanel.extend({
 		appL.setStyleName("align-right");
 		contextL.setStyleName("align-right");
 		descriptionL.setStyleName("align-right");
+		errorText.setStyleName("create-error-label");
 
 		resourceI.setAttributes({'errorMessage':'Enter a resource name using the pluralis name!', 'name':'resource', 'autofocus':'on'});
 		appI.setAttributes({'errorMessage':'Needs to be at least 3 characters in length!', 'name':'app'});
@@ -1318,15 +1320,18 @@ var CreateBox = FlowPanel.extend({
 						self.loader.hide();
 						self.hide();
 						window.rights.refresh();
+						errorText.setText("");
 					},
 					function(res) {
 						// Failed
 						console.log(res);
 						self.loader.hide();
 						self.hide();
+						errorText.setText("");
 					});					
 				} else {
 					// Error - Could not select the specific resource
+					errorText.setText("Could not specifically select the resource: " + resource_data["name"]);
 				}
 				console.log(res);
 				self.loader.hide();
@@ -1335,6 +1340,7 @@ var CreateBox = FlowPanel.extend({
 				// Failed
 				self.loader.hide();
 				self.hide();
+				errorText.setText("");
 			});
 
 			// POST to create rights
@@ -1371,6 +1377,7 @@ var CreateBox = FlowPanel.extend({
 		grid.setWidget(4,1,fp);
 
 		holder.add(header);
+		holder.add(errorText);
 		holder.add(grid);
 		return holder;
 	},
