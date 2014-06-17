@@ -754,7 +754,7 @@ var CMSCardPanel = FlowPanel.extend({
 			}
 			
 			cmsobj.setNoText();
-			PAPI._save(self.translations[cmsobj.locale].links[0].href, data, function(res) {
+			PAPI._save(self.translations[cmsobj.locale]._links["self"].href, data, function(res) {
 				if (console) console.log("Successfully saved for locale: " + cmsobj.locale);
 				cmsobj.setSuccess();
 			}, function(res) {
