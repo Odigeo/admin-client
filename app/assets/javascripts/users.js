@@ -1005,6 +1005,7 @@ var CreateBox = FlowPanel.extend({
 			function(res) {
 				// Failed
 				self.loader.hide();
+				self.hide();
 			});
 		});
 
@@ -1102,6 +1103,7 @@ var CreateBox = FlowPanel.extend({
 			function(res) {
 				// Failed
 				self.loader.hide();
+				self.hide();
 			});
 		});
 		
@@ -1190,6 +1192,7 @@ var CreateBox = FlowPanel.extend({
 			function(res) {
 				// Failed
 				self.loader.hide();
+				self.hide();
 			});
 		});
 		
@@ -1301,8 +1304,6 @@ var CreateBox = FlowPanel.extend({
 
 			self.loader.show();
 			// GET resource object that we will use to create rights for
-			console.log(resource_data);
-			console.log(data);
 			PAPI._get(resource_data, function(res) {
 				// Success
 				// Check if we got only 1 resource in collection since we used the query param "name" to select a specific one
