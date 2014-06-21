@@ -1309,8 +1309,8 @@ var CreateBox = FlowPanel.extend({
 				// Check if we got only 1 resource in collection since we used the query param "name" to select a specific one
 				// AND that it is a "resource" object
 				if(res["_collection"]["count"] === 1 && res["_collection"]["resources"][0]["resource"]) {
-					// We create only the right resource for GET currently
-					data["verb"] = "GET";
+					// We create only the right resource for GET* currently
+					data["verb"] = "GET*";
 					data["hyperlink"] = "self";
 					// Create rights for the selected resource
 					var resource_right_link = res["_collection"]["resources"][0]["resource"]["_links"]["rights"]["href"];
