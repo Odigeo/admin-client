@@ -1,3 +1,3 @@
 [submodule "app/assets/oceanfront"]
 	path = app/assets/oceanfront
-	url = https://github.com/OceanDev/oceanfront.git
+	url = https://github.com/OceanFront/framework.git

@@ -701,7 +701,7 @@ var CMSObject = FlowPanel.extend({
 	},
 	render: function() {
 		var nameText = new Text(this.locale);
-		this.statusL = new Text();
+		this.statusL = new Text("");
 
 		this.statusL.setStyleName("cms-object-status error-text");
 		nameText.setStyleName("padding10 relief-shadow");
