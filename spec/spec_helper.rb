@@ -31,6 +31,9 @@ else
   RSpec.configure do |config|
     config.infer_base_class_for_anonymous_controllers = false
     config.order = "random"
+
+    # RSpec 3 compatibility
+    config.infer_spec_type_from_file_location!
   end
 
   # Configure Watir
