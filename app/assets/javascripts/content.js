@@ -547,7 +547,14 @@ var BroadcastCard = FlowPanel.extend({
 		var self = this;
 		this.loader = new WidgetLoader();
 		this.swarms_holder = new FlowPanel();
-		this.click_header = new Text("Click to toggle Swarms");
+		this.click_header = new TextButton("Click to toggle Swarms", function(e) {
+			// Toggle holder
+			if(self.swarms_holder.getHeight() == "0px") {
+				self.swarms_holder.setHeight("100%");
+			} else {
+				self.swarms_holder.setHeight("0px");
+			}
+		});
 
 		this.swarms_holder.setStyleName("swarms-holder").setHeight("0px");
 		this.click_header.setStyleName("swarms-click-header");
@@ -558,15 +565,6 @@ var BroadcastCard = FlowPanel.extend({
 		this.add(this.click_header);
 		this.add(new Delimiter());
 		this.add(this.swarms_holder);
-
-		this.click_header.addClickListener(function(e) {
-			// Toggle holder
-			if(self.swarms_holder.getHeight() == "0px") {
-				self.swarms_holder.setHeight("100%");
-			} else {
-				self.swarms_holder.setHeight("0px");
-			}
-		});
 
 		// Add rendered swarms that exist for this broadcast
 		if(this.data.swarms) {
