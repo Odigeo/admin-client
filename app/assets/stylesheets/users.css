@@ -9,6 +9,13 @@ html {
 	overflow-y: scroll;
 }
 
+.create-error-label {
+	color: red;
+	min-height: 10px;
+	text-align: center;
+	margin: 10px 0px 0px 0px;
+}
+
 .drag-drop-icon {
 	background-image: url('../images/admin/drop_arrow.png');
 	width: 70px;

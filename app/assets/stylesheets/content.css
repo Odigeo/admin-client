@@ -1,0 +1,183 @@
+body {
+	background-image: url(../images/bg.png);
+	background-color: #001;
+}
+
+.textLarge {
+	font-size: 30px !important;
+}
+
+.textBlue {
+	color: #66CCFF;
+}
+
+#instrument-panel {
+	position: fixed;
+	right: 0px;
+	top: 26px;
+	background: -webkit-linear-gradient(top, #ffffff , #d9d9d9 97%, rgba(0,0,0,0.4)), url(../images/noise.png);
+
+	height: 90px;
+	width:100%;
+	box-shadow: 0px 5px 12px rgba(0,0,0,0.4);
+
+	z-index: 1000;
+}
+
+#instrument-panel input[type="search"] {
+	width: 160px;
+	height: 30px;
+	margin: 0px 10px 0px 0px;
+	font-size: 14px;
+	padding: 2px 5px 2px 5px;
+	border-radius: 10px;
+	border: 1px solid #ccc;
+}
+
+#topConsole h2 {
+	padding: 20px 0px 0px 0px;
+}
+
+#console-createB {
+	margin: 0px 30px 0px 20px;
+}
+
+#card-holder {
+	margin: 130px auto auto auto;
+}
+
+.card {
+	width: 900px;
+	padding: 10px;
+
+	background: -webkit-linear-gradient(top, rgb(255,255,255) , rgb(240,240,240)), url(../images/noise.png);
+	border-radius: 5px;
+	box-shadow: 10px 10px 15px rgba(0,0,0,0.3);
+
+	margin: 10px 0px 0px 0px;
+
+	-webkit-transition-property: all;
+	-webkit-transition-duration: 0.33s;
+	-webkit-transition-timing-function: ease-in;
+}
+
+.card-input-grid {
+	margin: 20px 0px 0px 0px;
+}
+
+.card-input-grid input {
+	margin: 2px 5px 2px 5px;
+	width: 160px;
+	font-size: 14px;
+	padding: 2px 5px 2px 5px;
+	border-radius: 10px;
+	background-color: rgba(0,0,0,0.0);
+	line-height: 17px;
+}
+
+.card-input-grid td {
+	
+}
+
+.card-input-grid td div {
+	width: 160px;
+	text-align: right;
+	font-size: 14px;
+	margin: 2px 5px 2px 5px;
+	padding: 2px 5px 2px 5px;
+	white-space: pre-wrap;
+	word-wrap:break-word;
+}
+
+.card-header-input-grid {
+	margin: 20px 0px 0px 0px;
+}
+
+.card-header-input-grid input {
+	margin: 2px 5px 2px 5px;
+	width: 160px;
+	font-size: 14px;
+	padding: 2px 5px 2px 5px;
+	border-radius: 10px;
+	background-color: rgba(0,0,0,0.0);
+	float: left;
+	line-height: 17px;
+}
+
+.card-header-input-grid td {
+	
+}
+
+.card-header-input-grid td div {
+	width: 160px;
+	text-align: right;
+	font-size: 14px;
+	margin: 2px 5px 2px 5px;
+	padding: 0px 5px 3px 5px;
+	float: right;
+}
+
+.input-full-row {
+	width: 523px !important;
+}
+
+.input-full-card {
+	width: 800px !important;
+}
+
+.swarms-holder {
+	overflow-y: hidden;
+	overflow-x: hidden;
+}
+
+.swarms-card {
+	width: 450px;
+	display: inline-block;
+	padding: 0px 0px 20px 0px;
+	margin: 20px 0px 0px 0px;
+	border: 1px solid #ddd;
+}
+
+.id-label {
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	font-size: 9px;
+}
+
+.swarms-click-header {
+	padding: 13px 0px 0px 0px;
+	height: 30px;
+	width: 100%;
+}
+
+.swarms-click-header:hover {
+	background: -webkit-linear-gradient(top, rgb(240,240,240) , rgb(200,200,200)), url(../images/noise.png);
+}
+
+.broadcast-button-holder {
+	position: absolute;
+	top: -245px;
+	left: 600px;
+	z-index: 20;
+}
+
+.swarm-button-holder {
+	position: absolute;
+	top: -2px;
+	left: 114px;
+	z-index: 20;
+}
+
+.bbCard {
+	font-size: 10px;
+	font-weight: normal;
+	background-color: rgb(255,255,255);
+	border: 1px solid #ccc;
+}
+
+.error-text {
+	color: red;
+	height: 12px;
+	font-size: 10px;
+}

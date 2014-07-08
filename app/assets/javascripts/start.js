@@ -16,14 +16,20 @@ var TopMenu = FlowPanel.extend({
 			var url = "http://" + window.location.host + "/logs";
 			window.location.href = url;
 		});
+		var contentB = new GradientButton("Content", function(e){
+			var url = "http://" + window.location.host + "/content";
+			window.location.href = url;
+		});
 
 		cmsB.setId("cms-button");
 		authB.setId("auth-button");
 		logB.setId("log-button");
+		contentB.setId("content-button");
 
 		this.add(cmsB);
 		this.add(authB);
 		this.add(logB);
+		this.add(contentB);
 	}
 });
 
