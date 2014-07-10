@@ -106,7 +106,6 @@ body {
 
 #flip-console {
 	width: 1000px;
-	overflow: hidden;
 	display: none;
 	
 	z-index: -5;
