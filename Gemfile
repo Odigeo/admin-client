@@ -11,7 +11,7 @@ group :default do
   gem 'bcrypt'
   gem 'uglifier', '>= 1.3.0'
   gem 'oj'
-end
+end 
 
 group :test, :development do
   gem "rspec-rails", "~> 2.0"

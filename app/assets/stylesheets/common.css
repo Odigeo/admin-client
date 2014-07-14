@@ -51,10 +51,6 @@ input[type="search"] {
 	margin-right: auto;
 }
 
-.of-FormGrid button {
-	float: right;
-}
-
 #topBar {
 	position: fixed;
 	right: 0px;
