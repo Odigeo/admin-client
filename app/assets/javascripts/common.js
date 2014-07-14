@@ -49,9 +49,9 @@ var PAPI = PAPIBase.extend({
       }
     }
   },
-  apiCall: function(link, data, method, success_callback, error_callback, headers) {
+  apiCall: function(link, data, method, success_callback, error_callback, headers, extras) {
     
-    if($.browser.msie) {
+    if($.browser.msie && ($.browser.version < 10)) {
 
       // Make sure we handle query correct depending if it exist or not
       if(link.indexOf('?') == -1) {
@@ -80,7 +80,7 @@ var PAPI = PAPIBase.extend({
     }
     
     // Make the actual API call in PAPIBase
-    this._super(link, data, method, success_callback, error_callback, headers);
+    this._super(link, data, method, success_callback, error_callback, headers, extras);
   },
   pre_error: function(xhr, textStatus, errorThrown) {
     // Override to get custom response handling
@@ -208,6 +208,10 @@ var PAPI = PAPIBase.extend({
     var link = this.api_domain() + "/" + this.api_version("log_excerpts_version") + "/log_excerpts/" + fromdate + "/" + todate;
     this.apiCall(link, null, "GET", success, error, this.getHeaders());
   },
+  createRight: function(right_link, data, success, error, extras) {
+    // right_link should be the rights link of a resource object that you want to create the right for, according to documentation
+    this.apiCall(right_link, data, "POST", success, error, this.getHeaders(), extras);
+  },
   connect: function(link1, link2, success, error) {
     link1 += '?href=' + encodeURI(link2);
     this.apiCall(link1, {}, "PUT", success, error, this.getHeaders());
@@ -216,58 +220,58 @@ var PAPI = PAPIBase.extend({
     link1 += '?href=' + encodeURI(link2);
     this.apiCall(link1, {}, "DELETE", success, error, this.getHeaders());
   },
-  _save: function(link, data, success, error) {
-    this.apiCall(link, data, "PUT", success, error, this.getHeaders());
+  _save: function(link, data, success, error, extras) {
+    this.apiCall(link, data, "PUT", success, error, this.getHeaders(), extras);
   },
-  _delete: function(link, success, error) {
-    this.apiCall(link, null, "DELETE", success, error, this.getHeaders());
+  _delete: function(link, success, error, extras) {
+    this.apiCall(link, null, "DELETE", success, error, this.getHeaders(), extras);
   },
-  _get: function(data_or_link, success, error) {
+  _get: function(data_or_link, success, error, extras) {
     var link = "";
     link = this.construct_link(data_or_link, true);
-    this.apiCall(link, null, "GET", success, error, this.getHeaders());
+    this.apiCall(link, null, "GET", success, error, this.getHeaders(), extras);
   },
-  _create: function(data, success, error) {
+  _create: function(data, success, error, extras) {
     var link = "";
     link = this.construct_link(data, false);
-    this.apiCall(link, data, "POST", success, error, this.getHeaders());
+    this.apiCall(link, data, "POST", success, error, this.getHeaders(), extras);
   }
 });
 
 window.PAPI = new PAPI();
 
 var HashFactory = Class.extend({
-	init: function() {
-		this.readHash();
-	},
-	readHash: function() {
-		var tmphash = window.location.hash;
-		tmphash = tmphash.slice(2, tmphash.length); //removes the #/ chars
-		tmphash = tmphash.split("/");
-		if(window.location.pathname.match(/cms/)) {
-			this.hash = {};
-			this.hash["app"] = tmphash[0];
-			this.hash["context"] = tmphash[1];
-			this.hash["name"] = tmphash[2];
-			this.hash["locale"] = tmphash[3];
-			this.hash["usage"] = tmphash[4];
-		}
-	},
-	getApp: function() {
-		return this.hash.app;
-	},
-	getContext: function() {
-		return this.hash.context;
-	},
-	getName: function() {
-		return this.hash.name;
-	},
-	getLocale: function() {
-		return this.hash.locale;
-	},
-	getUsage: function() {
-		return this.hash.usage;
-	}
+  init: function() {
+    this.readHash();
+  },
+  readHash: function() {
+    var tmphash = window.location.hash;
+    tmphash = tmphash.slice(2, tmphash.length); //removes the #/ chars
+    tmphash = tmphash.split("/");
+    if(window.location.pathname.match(/cms/)) {
+      this.hash = {};
+      this.hash["app"] = tmphash[0];
+      this.hash["context"] = tmphash[1];
+      this.hash["name"] = tmphash[2];
+      this.hash["locale"] = tmphash[3];
+      this.hash["usage"] = tmphash[4];
+    }
+  },
+  getApp: function() {
+    return this.hash.app;
+  },
+  getContext: function() {
+    return this.hash.context;
+  },
+  getName: function() {
+    return this.hash.name;
+  },
+  getLocale: function() {
+    return this.hash.locale;
+  },
+  getUsage: function() {
+    return this.hash.usage;
+  }
 });
 
 var DragAndDropWidget = FlowPanel.extend({
@@ -583,30 +587,29 @@ var FileWidget = DragAndDropWidget.extend({
 });
 
 var LoginView = FlowPanel.extend({
-	init: function() {
-		this._super();
-		this.render();
-		this.setStyleName("login-panel main-panel d50");
-		this.setId("login-panel");
+  init: function() {
+    this._super();
+    this.render();
+    this.setStyleName("login-panel main-panel d50");
+    this.setId("login-panel");
     this.loader = new WidgetLoader();
     this.add(this.loader);
-	},
-	onLogin: function() {
-		var self = this;
-		var data = {};
-		data.login = $('#login-input', this.getElement()).val();
-		data.password = $('#password-input', this.getElement()).val();
-		
+  },
+  onLogin: function() {
+    var self = this;
+    var data = {};
+    data.login = $('#login-input', this.getElement()).val();
+    data.password = $('#password-input', this.getElement()).val();
+    
     if(data.login && data.password) {
       self.loader.show(true);
       PAPI.login(data, function(res) {
         // Success
         if(res) {
           if(res.authentication) {
-            // Expire in 1 year (1 year forward in time)
             // This is to not get rand-rpbolems in API when end-user tokens expire
             var date = new Date();
-            date.setTime(date.getTime() + (356 * 24 * 60 * 60 * 1000));
+            date.setTime(date.getTime() + (30 * 60 * 1000));
             // Save login name for future autopopulation for 300 days
             $.cookie('user-login-name', data.login, {'expires':date, 'path': '/'});
             // Clear password input field
@@ -636,7 +639,7 @@ var LoginView = FlowPanel.extend({
     } else {
       // Front End error handling for missing input values
     }
-	},
+  },
   setVisible: function(visible) {
     if(visible) {
       if($.cookie('user-login')) {
@@ -654,77 +657,81 @@ var LoginView = FlowPanel.extend({
     }
     this._super(visible);
   },
-	showError: function() {
-		$('#login-error-label', this.getElement()).fadeOut(100, function(){}).fadeIn(200, function(){});
-	},
-	render: function() {
-		var self = this;
+  showError: function() {
+    $('#login-error-label', this.getElement()).fadeOut(100, function(){}).fadeIn(200, function(){});
+  },
+  render: function() {
+    var self = this;
 
     // Use this holder to have padding, otherwise it fucks the loaders size calculations up on the top node
     var fp = new FlowPanel();
     fp.setStyle("padding", "5px 30px 5px 30px");
 
-		var loginI = new TextBox();
-		var pswI = new PasswordTextBox();
-		var headerL = new Header2("Admin Tool");
-		var confirmB = new GradientButton("Confirm");
-		var errorP = new FlowPanel();
-		var errorL = new Text("Your password or login name is incorrect. Please try again!", true);
-		var footer = new FlowPanel();
-		var grid = new Grid(3,2);
-		this.cube = new Cube();
+    var loginI = new TextBox();
+    var pswI = new PasswordTextBox();
+    var headerL = new Header2("Admin Tool");
+    var confirmB = new GradientButton("Confirm");
+    var errorP = new FlowPanel();
+    var errorL = new Text("Your password or login name is incorrect. Please try again!", true);
+    var footer = new FlowPanel();
+    var grid = new Grid(3,2);
+    this.cube = new Cube();
 
-		headerL.setStyleName("align-left d20");
-		grid.setStyleName("align-left");
-		grid.setId("grid-login");
-		errorL.setId("login-error-label");
-		errorP.setHeight("50px");
-		errorP.setStyleName("");
-		confirmB.setId("login-confirm-button");
-		confirmB.setStyleName("gbWhite gbLarge");
-		loginI.setId("login-input");
-		pswI.setId("password-input");
-		footer.setId("login-footer");
+    headerL.setStyleName("align-left d20");
+    grid.setStyleName("align-left");
+    grid.setId("grid-login");
+    errorL.setId("login-error-label");
+    errorP.setHeight("50px");
+    errorP.setStyleName("");
+    confirmB.setId("login-confirm-button");
+    confirmB.setStyleName("gbWhite gbLarge");
+    loginI.setId("login-input");
+    pswI.setId("password-input");
+    footer.setId("login-footer");
 
     $(loginI.getElement()).attr("placeholder", "Login");
     $(pswI.getElement()).attr("placeholder", "Password");
 
-		grid.setWidget(0,0, loginI);
-		grid.setWidget(1,0, pswI);
-		grid.setWidget(2,0, confirmB);
+    grid.setWidget(0,0, loginI);
+    grid.setWidget(1,0, pswI);
+    grid.setWidget(2,0, confirmB);
 
-		grid.addTableListener(function(table, e) {
-			var target = e.target;
-			if(e.type === "click" && target.id == "login-confirm-button") {
-				self.onLogin();
-			} else if(e.keyCode == 13) {
-				//Enter key pressed
-				self.onLogin();
-			}
-		});
+    grid.addTableListener(function(table, e) {
+      var target = e.target;
+      if(e.type === "click" && target.id == "login-confirm-button") {
+        self.onLogin();
+      } else if(e.keyCode == 13) {
+        //Enter key pressed
+        self.onLogin();
+      }
+    });
 
-		errorP.add(errorL);
-		fp.add(headerL);
+    errorP.add(errorL);
+    fp.add(headerL);
     fp.add(footer);
-		fp.add(grid);
+    fp.add(grid);
     fp.add(errorP);
-		fp.add(this.cube);
+    fp.add(this.cube);
     this.add(fp);
-	}
+  }
 });
 
 var GradientButton = FocusWidget.extend({
-	init: function(name, fn) {
-		this.name = name;
-		this._super(this.render());
+  init: function(name, fn) {
+    if(name) {
+      this.name = name;
+    } else {
+      this.name = "";
+    }
+    this._super(this.render());
 
-		if(fn) {
-			this.addMouseUpListener(fn);
-		}
-	},
-	render: function() {
-		return html.div({'class':'clickable gradientButton'}, this.name);
-	}
+    if(fn) {
+      this.addMouseUpListener(fn);
+    }
+  },
+  render: function() {
+    return html.div({'class':'clickable gradientButton'}, this.name);
+  }
 });
 
 var CloseButton = FocusWidget.extend({
@@ -742,47 +749,47 @@ var CloseButton = FocusWidget.extend({
 });
 
 var BonBonButton = FocusWidget.extend({
-	init: function(name, fn, symbol) {
-		this.name = name;
-		if(symbol) {
-			this.symbol = symbol;
-		}
+  init: function(name, fn, symbol) {
+    this.name = name;
+    if(symbol) {
+      this.symbol = symbol;
+    }
 
-		this._super(this.render());
+    this._super(this.render());
 
-		if(fn) {
-			this.addMouseUpListener(fn);
-		}
-	},
-	render: function() {
-		var symbolchar = "";
-		if(this.symbol) {symbolchar = this.symbol;}
-		return html.button({'class':'clickable bbButton', 'data-icon':symbolchar }, this.name);
-	}
+    if(fn) {
+      this.addMouseUpListener(fn);
+    }
+  },
+  render: function() {
+    var symbolchar = "";
+    if(this.symbol) {symbolchar = this.symbol;}
+    return html.button({'class':'clickable bbButton', 'data-icon':symbolchar }, this.name);
+  }
 });
 
 var Cube = Widget.extend({
-	init: function() {
-		this._super();
-		this.setElement(this.render());
-	},
+  init: function() {
+    this._super();
+    this.setElement(this.render());
+  },
   stop: function() {
     $('#cube', this.getElement()).css("-webkit-animation-play-state", "paused");
   },
   start: function() {
     $('#cube', this.getElement()).css("-webkit-animation-play-state", "running");
   },
-	render: function() {
-		return html.div({'id':'cube-holder'},
-				html.div({'id':'cube'},
-					html.div({'class':'cube-side cube-top'}, 'ۻ'),
-					html.div({'class':'cube-side cube-bottom'}, 'ת'),
-					html.div({'class':'cube-side cube-front'}, 'ऎ'),
-					html.div({'class':'cube-side cube-back'}, 'S'),
-					html.div({'class':'cube-side cube-left'}, 'ਈ'),
-					html.div({'class':'cube-side cube-right'}, 'ઔ')
-					));
-	}
+  render: function() {
+    return html.div({'id':'cube-holder'},
+        html.div({'id':'cube'},
+          html.div({'class':'cube-side cube-top'}, 'ۻ'),
+          html.div({'class':'cube-side cube-bottom'}, 'ת'),
+          html.div({'class':'cube-side cube-front'}, 'ऎ'),
+          html.div({'class':'cube-side cube-back'}, 'S'),
+          html.div({'class':'cube-side cube-left'}, 'ਈ'),
+          html.div({'class':'cube-side cube-right'}, 'ઔ')
+          ));
+  }
 });
 
 var TopBar = FlowPanel.extend({

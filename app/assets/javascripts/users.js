@@ -123,7 +123,7 @@ var TopConsole = FlowPanel.extend({
 				var data = self.currentSelectedItem.data;
 				data[value_name] = new_value;
 				self.loader.show();
-				PAPI.save(self.currentSelectedItem.getLink("self"), data, function(res) {
+				PAPI._save(self.currentSelectedItem.getLink("self"), data, function(res) {
 					// Just save the data in current object rather than instantiate a new one, because then we would loose reference pointers etc
 					var type = self.currentSelectedItem.getType();
 					self.currentSelectedItem.data = res[type];
@@ -474,22 +474,34 @@ var BoxItem = DragAndDropWidget.extend({
 	valueExist: function(searchValue) {
 		// Replace all * with \* to be able to search for the character and not RegEx *
 		searchValue = searchValue.replace(/\*/g, '\\*');
-		for(var obj in this.data) {
-			var value = this.data[obj];
-			if(typeof value !== "object") {
-				// So dont search in arrays or objects (like "links")
+		// If searchValue has sapces it means AND, pipe OR and semicolon attribute
+		// "api_user GET name:kalle" is same as search for "api_user AND GET AND HAS ATTRIBUTE name=kalle"
 
-				if(typeof value === "number") {
-					// Search data value as a number
-				} else if(typeof value === "string") {
-					// Search data value as a string
-					if(value.toLowerCase().match(searchValue.toLowerCase())) {
-						return true;
+		searchValue = searchValue.split(" ");
+		for(var i=0; i<searchValue.length; i++) {
+			var match = false;
+			for(var obj in this.data) {
+				var value = this.data[obj];
+				if(typeof value !== "object") {
+					// So dont search in arrays or objects (like "links")
+
+					if(typeof value === "number") {
+						// Search data value as a number
+					} else if(typeof value === "string") {
+						// Search data value as a string
+						if(value.toLowerCase().match(searchValue[i].toLowerCase())) {
+							match = true;
+							break; // Step out of for-loop
+						}
 					}
 				}
 			}
+			if(!match) {
+				// Stop searching since we didn't find this explicit record and we search with AND logic
+				return false;
+			}
 		}
-		return false;
+		return true;
 	},
 	getLink: function(rel) {
 		if(typeof this.data._links === "object" && this.data["_links"][rel]) {
@@ -667,32 +679,29 @@ var ContainerWidget = DragAndDropWidget.extend({
 		var searchI = new SearchBox();
 		this.container = new FromBucketContainer();
 
+		var filter_fn = function(that, e) {
+			// Filter
+			var result = [];
+			var itemlist = self.items;
+
+			for(var i=0; i<itemlist.length; i++) {
+				if(itemlist[i].valueExist(that.getText()))
+					result.push(itemlist[i]);
+			}
+			self.container.clear();
+			self.showItems(result);
+		};
+
 		searchI.addKeyboardListener(function(that, e) {
 			var type = e.type;
 			if(type === "keyup" && that.getText().length > -1) {
-				// Filter
-				var result = [];
-				var itemlist = self.items;
-				for(var i=0; i<itemlist.length; i++) {
-					if(itemlist[i].valueExist(that.getText()))
-						result.push(itemlist[i]);
-				}
-				self.container.clear();
-				self.showItems(result);
+				filter_fn(that, e);
 			}
 		});
 		searchI.addSearchListener(function(that, e) {
 			var type = e.type;
 			if(type === "search" && that.getText().length > -1) {
-				// Filter
-				var result = [];
-				var itemlist = self.items;
-				for(var i=0; i<itemlist.length; i++) {
-					if(itemlist[i].valueExist(that.getText()))
-						result.push(itemlist[i]);
-				}
-				self.container.clear();
-				self.showItems(result);
+				filter_fn(that, e);
 			}
 		});
 
@@ -996,6 +1005,7 @@ var CreateBox = FlowPanel.extend({
 			function(res) {
 				// Failed
 				self.loader.hide();
+				self.hide();
 			});
 		});
 
@@ -1093,6 +1103,7 @@ var CreateBox = FlowPanel.extend({
 			function(res) {
 				// Failed
 				self.loader.hide();
+				self.hide();
 			});
 		});
 		
@@ -1181,6 +1192,7 @@ var CreateBox = FlowPanel.extend({
 			function(res) {
 				// Failed
 				self.loader.hide();
+				self.hide();
 			});
 		});
 		
@@ -1214,11 +1226,15 @@ var CreateBox = FlowPanel.extend({
 		$(saveB.getElement()).attr('name', 'save').attr('type', 'submit');
 		$(cancelB.getElement()).attr('name', 'cancel').attr('type', 'button');
 		var header = new Header2("Create a new Right");
+		var errorText = new Text("");
 
 		// User special label inputs
-		var nameL = new Text("Name");
+		var resourceL = new Text("Resource");
+		var appL = new Text("App");
+		var contextL = new Text("Context");
 		var descriptionL = new Text("Description");
-		var nameI = new TextBox(function() {
+
+		var resourceI = new TextBox(function() {
 			// Validation
 			var value = $(this.getElement()).val();
 			if(value) {
@@ -1226,50 +1242,120 @@ var CreateBox = FlowPanel.extend({
 			} else {
 				return false;
 			}
+		});
+		var appI = new TextBox(function() {
+			// Validation
+			var value = $(this.getElement()).val();
+			if(value.length > 2) {
+				return true;
+			} else {
+				return false;
+			}
+		});
+		var contextI = new TextBox(function() {
+			return true;
 		});
 		var descriptionI = new TextBox(function() {
 			// Validation
 			var value = $(this.getElement()).val();
-			if(value) {
+			if(value.length > 7) {
 				return true;
 			} else {
 				return false;
 			}
 		});
 
-		nameL.setStyleName("align-right");
+		resourceL.setStyleName("align-right");
+		appL.setStyleName("align-right");
+		contextL.setStyleName("align-right");
 		descriptionL.setStyleName("align-right");
+		errorText.setStyleName("create-error-label");
 
-		$(nameI.getElement()).attr('errorMessage', 'Enter a name of this item!').attr('name', 'username').attr('autofocus', 'on');
-		$(descriptionI.getElement()).attr('errorMessage', 'Enter a description!').attr('name', 'realname');
+		resourceI.setAttributes({'errorMessage':'Enter a resource name using the pluralis name!', 'name':'resource', 'autofocus':'on'});
+		appI.setAttributes({'errorMessage':'Needs to be at least 3 characters in length!', 'name':'app'});
+		contextI.setAttributes({'name':'context'});
+		descriptionI.setAttributes({'errorMessage':'Enter a description with at least 8 characters!', 'name':'description'});
 
-		var grid = new FormGrid(3, 2);
+		var grid = new FormGrid(5, 2);
 		grid.setStyleName("create-grid");
 		$(grid.getElement()).attr('autocomplete', 'on');
 		
-		grid.addOnSave(function(form,event){
+		grid.addOnSave(function(form,event) {
 			// Valid form do PAPI call
 			console.log("Valid form");
-			// Collect data
+			// Collect data for right object
 			var data = {};
 			data.service = "rights";
+			var resource_data = {};
+			resource_data.service = "resources";
+
 			var inputs = $('input', grid.getElement());
 			for(var i=0;i<inputs.length;i++) {
-				data[inputs[i].name] = $(inputs[i]).val();
+				if(inputs[i].name !== "resource") { // Data for the created right
+					data[inputs[i].name] = $(inputs[i]).val();
+				} else if(inputs[i].name === "resource") { // Argument data for GET the resource that we will create right for
+					resource_data["name"] = $(inputs[i]).val();
+				}
 			}
-			// Create
+			// Add * to context if it was not given
+			if(data['context'] === "") {
+				data['context'] = "*";
+			}
+
 			self.loader.show();
-			PAPI._create(data, function(res) {
-				console.log("Created Right");
-				window.rights.refresh();
-				form.clearAll();
+			// GET resource object that we will use to create rights for
+			PAPI._get(resource_data, function(res) {
+				// Success
+				// Check if we got only 1 resource in collection since we used the query param "name" to select a specific one
+				// AND that it is a "resource" object
+				if(res["_collection"]["count"] === 1 && res["_collection"]["resources"][0]["resource"]) {
+					// We create only the right resource for GET* currently
+					data["verb"] = "GET*";
+					data["hyperlink"] = "self";
+					// Create rights for the selected resource
+					var resource_right_link = res["_collection"]["resources"][0]["resource"]["_links"]["rights"]["href"];
+					PAPI.createRight(resource_right_link, data, function(res) {
+						// Success
+						console.log("Successfully created right resource for " + resource_data["name"]);
+						console.log(res);
+						self.loader.hide();
+						self.hide();
+						window.rights.refresh();
+						errorText.setText("");
+					},
+					function(res) {
+						// Failed
+						console.log(res);
+						self.loader.hide();
+						self.hide();
+						errorText.setText("");
+					});					
+				} else {
+					// Error - Could not select the specific resource
+					errorText.setText("Could not specifically select the resource: " + resource_data["name"]);
+				}
+				console.log(res);
 				self.loader.hide();
-				self.hide();
 			},
 			function(res) {
 				// Failed
 				self.loader.hide();
+				self.hide();
+				errorText.setText("");
 			});
+
+			// POST to create rights
+			// PAPI._create(data, function(res) {
+			// 	console.log("Created Right");
+			// 	window.rights.refresh();
+			// 	form.clearAll();
+			// 	self.loader.hide();
+			// 	self.hide();
+			// },
+			// function(res) {
+			// 	// Failed
+			// 	self.loader.hide();
+			// });
 		});
 		
 		grid.addOnCancel(function(form,event){
@@ -1281,13 +1367,18 @@ var CreateBox = FlowPanel.extend({
 		fp.add(cancelB);
 		fp.add(saveB);
 
-		grid.setWidget(0,0,nameL);
-		grid.setWidget(0,1,nameI);
-		grid.setWidget(1,0,descriptionL);
-		grid.setWidget(1,1,descriptionI);
-		grid.setWidget(2,1,fp);
+		grid.setWidget(0,0,resourceL);
+		grid.setWidget(0,1,resourceI);
+		grid.setWidget(1,0,appL);
+		grid.setWidget(1,1,appI);
+		grid.setWidget(2,0,contextL);
+		grid.setWidget(2,1,contextI);
+		grid.setWidget(3,0,descriptionL);
+		grid.setWidget(3,1,descriptionI);
+		grid.setWidget(4,1,fp);
 
 		holder.add(header);
+		holder.add(errorText);
 		holder.add(grid);
 		return holder;
 	},
