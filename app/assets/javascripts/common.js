@@ -49,7 +49,7 @@ var PAPI = PAPIBase.extend({
       }
     }
   },
-  apiCall: function(link, data, method, success_callback, error_callback, headers, extras) {
+  apiCall: function(link, data, method, success_callback, error_callback, headers) {
     
     if($.browser.msie) {
 
@@ -80,7 +80,7 @@ var PAPI = PAPIBase.extend({
     }
     
     // Make the actual API call in PAPIBase
-    this._super(link, data, method, success_callback, error_callback, headers, extras);
+    this._super(link, data, method, success_callback, error_callback, headers);
   },
   pre_error: function(xhr, textStatus, errorThrown) {
     // Override to get custom response handling
@@ -208,22 +208,6 @@ var PAPI = PAPIBase.extend({
     var link = this.api_domain() + "/" + this.api_version("log_excerpts_version") + "/log_excerpts/" + fromdate + "/" + todate;
     this.apiCall(link, null, "GET", success, error, this.getHeaders());
   },
-  getBroadcasts: function(success, error) {
-    var link = this.api_domain() + "/" + this.api_version("broadcasts_version") + "/broadcasts";
-    this.apiCall(link, null, "GET", success, error, this.getHeaders());
-  },
-  createSwarm: function(data, success, error, extras) {
-    var link = this.api_domain() + "/" + this.api_version("swarms_version") + "/swarms/";
-    this.apiCall(link, data, "POST", success, error, this.getHeaders(), extras);
-  },
-  createBroadcast: function(data, success, error, extras) {
-    var link = this.api_domain() + "/" + this.api_version("broadcast_version") + "/broadcasts/";
-    this.apiCall(link, data, "POST", success, error, this.getHeaders(), extras);
-  },
-  createRight: function(right_link, data, success, error, extras) {
-    // right_link should be the rights link of a resource object that you want to create the right for, according to documentation
-    this.apiCall(right_link, data, "POST", success, error, this.getHeaders(), extras);
-  },
   connect: function(link1, link2, success, error) {
     link1 += '?href=' + encodeURI(link2);
     this.apiCall(link1, {}, "PUT", success, error, this.getHeaders());
@@ -232,21 +216,21 @@ var PAPI = PAPIBase.extend({
     link1 += '?href=' + encodeURI(link2);
     this.apiCall(link1, {}, "DELETE", success, error, this.getHeaders());
   },
-  _save: function(link, data, success, error, extras) {
-    this.apiCall(link, data, "PUT", success, error, this.getHeaders(), extras);
+  _save: function(link, data, success, error) {
+    this.apiCall(link, data, "PUT", success, error, this.getHeaders());
   },
-  _delete: function(link, success, error, extras) {
-    this.apiCall(link, null, "DELETE", success, error, this.getHeaders(), extras);
+  _delete: function(link, success, error) {
+    this.apiCall(link, null, "DELETE", success, error, this.getHeaders());
   },
-  _get: function(data_or_link, success, error, extras) {
+  _get: function(data_or_link, success, error) {
     var link = "";
     link = this.construct_link(data_or_link, true);
-    this.apiCall(link, null, "GET", success, error, this.getHeaders(), extras);
+    this.apiCall(link, null, "GET", success, error, this.getHeaders());
   },
-  _create: function(data, success, error, extras) {
+  _create: function(data, success, error) {
     var link = "";
     link = this.construct_link(data, false);
-    this.apiCall(link, data, "POST", success, error, this.getHeaders(), extras);
+    this.apiCall(link, data, "POST", success, error, this.getHeaders());
   }
 });
 
@@ -619,9 +603,10 @@ var LoginView = FlowPanel.extend({
         // Success
         if(res) {
           if(res.authentication) {
+            // Expire in 1 year (1 year forward in time)
             // This is to not get rand-rpbolems in API when end-user tokens expire
             var date = new Date();
-            date.setTime(date.getTime() + (30 * 60 * 1000));
+            date.setTime(date.getTime() + (356 * 24 * 60 * 60 * 1000));
             // Save login name for future autopopulation for 300 days
             $.cookie('user-login-name', data.login, {'expires':date, 'path': '/'});
             // Clear password input field
@@ -730,11 +715,7 @@ var LoginView = FlowPanel.extend({
 
 var GradientButton = FocusWidget.extend({
 	init: function(name, fn) {
-    if(name) {
-      this.name = name;
-    } else {
-		  this.name = "";
-    }
+		this.name = name;
 		this._super(this.render());
 
 		if(fn) {

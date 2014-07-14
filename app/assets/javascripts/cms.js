@@ -995,14 +995,6 @@ var UIView = FlowPanel.extend({
 	setVisible: function(bool) {
 		if(bool) {
 		  document.title = "CMS";
-
-		  // Trigger search if visible since LoginView might have been shown when entering with CMS data
-			var app = $('input[id="app"]', '#console-search-holder').val();
-			var context = $('input[id="context"]', '#console-search-holder').val();
-
-			if(app && context) {
-				uiview.topConsole.onSearch();
-			}
 		} else {
 		  
 		}
@@ -1125,5 +1117,134 @@ $(document).ready(function() {
 	if(window.location.hash != "") {
 		// Takes care of initial load and initialisation in hash state
 		hashFunc();
-	}	
+	}
+
+/*
+*	Garbage code for developing and testing code
+*
+*/
+
+	//window.uiview.createDummies();
+
+	/*
+	var link = 'http://master-lb.travelservices.se/v1/apps/exampleappname/contexts/textAreaWidget/names/header/translations/sv-SE';
+
+	var data = {
+		link:'hej',
+		app:"exampleappname",
+		context:"textAreaWidget",
+		name:"header",
+		locale:"sv-SE",
+		mime_type:"text/plain",
+		usage:"text",
+		result:"Text Area",
+		created_at:"2012-11-21T12:50:45Z",
+		updated_at:"2012-11-21T12:50:45Z",
+		lock_version:0
+	};
+
+
+	PAPI._save(link, data, function(res){
+		console.log(res);
+		console.log("Succeeded at PUT!!");
+	});
+
+	PAPI.apiGET(link, function(res) {
+		console.log(res);
+		console.log("Succeeded at GET!!");
+	});
+	*/
+	/*
+	var testPost = {
+			'app' : 'exampleappname',
+			'context' : 'searchWidget',
+			'name' : 'link1',
+			'locale' : 'sv-SE',
+			'mime_type' : 'text/plain',
+			'result' : '<a href="#!text=blaha">Test Link</a>',
+			'usage' : 'link'
+		};
+		PAPI.apiPOST(testPost, '/v1/apps/exampleappname/contexts/searchWidget/names/link1/translations', function(data, testStatus, xhr) {
+			console.log("Success se");
+			console.log(data);
+			console.log(testStatus);
+			console.log(xhr);
+		});
+	*/
+	/*
+	for (var i = 1; i < 1000; i++) {
+		// se
+		var testPost = {
+			'app' : 'exampleappname',
+			'context' : 'searchWidget' + i,
+			'name' : 'headerMain',
+			'locale' : 'sv-SE',
+			'mime_type' : 'text/plain',
+			'result' : "test " + i
+		};
+		PAPI.apiPOST(testPost, '/apps/exampleappname/contexts/searchWidget'+i+'/names/headerMain/translations', function(data, testStatus, xhr) {
+			console.log("Success se");
+			//console.log(data);
+			//console.log(testStatus);
+			//console.log(xhr);
+		});
+
+		// no
+		var testPost = {
+			'app' : 'exampleappname',
+			'context' : 'searchWidget' + i,
+			'name' : 'headerMain',
+			'locale' : 'no-NO',
+			'mime_type' : 'text/plain',
+			'result' : "test " + i
+		};
+		PAPI.apiPOST(testPost, '/apps/exampleappname/contexts/searchWidget'+i+'/names/headerMain/translations', function(data, testStatus, xhr) {
+			console.log("Success no");
+			//console.log(data);
+			//console.log(testStatus);
+			//console.log(xhr);
+		});
+
+		// dk
+		var testPost = {
+			'app' : 'exampleappname',
+			'context' : 'searchWidget' + i,
+			'name' : 'headerMain',
+			'locale' : 'da-DK',
+			'mime_type' : 'text/plain',
+			'result' : "test " + i
+		};
+		PAPI.apiPOST(testPost, '/apps/exampleappname/contexts/searchWidget'+i+'/names/headerMain/translations', function(data, testStatus, xhr) {
+			console.log("Success dk");
+			//console.log(data);
+			//console.log(testStatus);
+			//console.log(xhr);
+		});
+
+		// en
+		var testPost = {
+			'app' : 'exampleappname',
+			'context' : 'searchWidget' + i,
+			'name' : 'headerMain',
+			'locale' : 'en-GB',
+			'mime_type' : 'text/plain',
+			'result' : "test " + i
+		};
+		PAPI.apiPOST(testPost, '/apps/exampleappname/contexts/searchWidget'+i+'/names/headerMain/translations', function(data, testStatus, xhr) {
+			console.log("Success en");
+			//console.log(data);
+			//console.log(testStatus);
+			//console.log(xhr);
+		});
+	};
+	*/
+	/*
+	PAPI.testQuery("/apps", function(data, testStatus, xhr) {
+		console.log("Success");
+		console.log(data);
+		console.log(testStatus);
+		console.log(xhr);
+	});
+	*/
+	
 });
