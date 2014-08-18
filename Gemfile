@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 group :default do
-  gem "rails", "~> 4.0.0"
+  gem "rails", "~> 4.0"
   gem "ocean-rails", ">= 2.11.2 "
   gem "ocean-dynamo", ">= 0.3.1"
   gem 'net-purge'          # For Varnish purges
