@@ -1,6 +1,6 @@
 # Set up the host and port of the client app being tested 
 client_host = ENV["CLIENT_HOST"] || "http://localhost"
-client_port = ENV["CLIENT_PORT"] || 3000 
+client_port = ENV["CLIENT_PORT"] || 3005 
 
 # Setting CLIENT_HOST indicates that you want to test against
 # an external server, and therefore not use rails on windows
