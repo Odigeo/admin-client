@@ -1,6 +1,11 @@
 # Set up the host and port of the client app being tested 
 client_host = ENV["CLIENT_HOST"] || "http://localhost"
-client_port = ENV["CLIENT_PORT"] || 3005 
+branch = ENV["GIT_BRANCH"] || "master"
+if branch == "master"
+  client_port = ENV["CLIENT_PORT"] || 3000 
+else
+  client_port = ENV["CLIENT_PORT"].to_i + 1 || 3000 
+end
 
 # Setting CLIENT_HOST indicates that you want to test against
 # an external server, and therefore not use rails on windows
