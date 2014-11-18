@@ -1,5 +1,6 @@
 var PAPI = PAPIBase.extend({
   init: function() {
+    this.user_authentication = null;
     this._super();
   },
   api_domain: function() {
@@ -21,16 +22,10 @@ var PAPI = PAPIBase.extend({
     // Use custom token (user login) first, otherwise clients initial token
     if(!custom_headers) {
       var token = "";
-      if($.cookie("user-login")) {
-        // if(typeof $.cookie("user-login") === "string") {
-        //   token = JSON.parse($.cookie("user-login")).token;
-        // } else if(typeof $.cookie("user-login") === "object") {
-        //   token = $.cookie("user-login").token;
-        // }
-        token = $.cookie("user-login");
+      if($.cookie('token')) {
+        token = decodeURIComponent($.cookie('token'));
       } else {
-        token = config.INITIAL_API_TOKEN;
-        if(console) console.warn("Used applications auth token!!");
+        token = config.INITIAL_API_TOKEN; // Currently not retrieved in the controllers on Rails app
       }
 
       // Add extra headers specified in data hash
@@ -49,55 +44,48 @@ var PAPI = PAPIBase.extend({
       }
     }
   },
-  apiCall: function(link, data, method, success_callback, error_callback, headers, extras) {
-    
-    if($.browser.msie && ($.browser.version < 10)) {
+  apiCall: function(link, data, method, success_callback, error_callback, headers, extras, retries) {
+    var self = this;
 
-      // Make sure we handle query correct depending if it exist or not
-      if(link.indexOf('?') == -1) {
-        link += '?';
+    var error_callback_extra = function(xhr) {
+      var counter_retries = retries || 0;
+      counter_retries++;
+
+      if(counter_retries > 3) {
+        // Stop retrying and fire failed
+        error_callback(xhr);
+      } else if(xhr.status == 419 || xhr.status == 400) {
+        // Need to refresh authentication token
+        if($.cookie('credentials')) {
+          var creds = {'credentials': decodeURIComponent($.cookie('credentials'))};
+          PAPI.login(creds, function(res) {
+            // Success
+            // Redo the initial call that failed
+            PAPI.apiCall(link, data, method, success_callback, error_callback, self.getHeaders(), extras, counter_retries);
+          },
+          function(xhr) {
+            console.warn("Could not auto authenticate user");
+            error_callback(xhr);
+          });
+        } else {
+          if(window.mainFlow) {
+            // Login view
+            window.mainFlow.fadeToWidget(0);
+          }
+        }
+      } else if(xhr.status == 503 || xhr.status == 500) {
+        // Try to redo the call with a cooldown of 1000ms
+        console.warn("Recalling because of 503 or 500");
+        setTimeout(function(){PAPI.apiCall(link, data, method, success_callback, error_callback, headers, extras, counter_retries);}, 1000);
       } else {
-        link += '&';
-      }
-      // Add special params for Ocean back-end handling IE in varnish
-      if(method === "PUT") {
-        link += '_method=PUT';
-        method = "POST";
-      } else if(method === "DELETE") {
-        link += '_method=DELETE';
-        method = "POST";
-      } else if(method === "POST") {
-        link += '_method=POST';
-        method = "POST";
-      } else if(method === "GET") {
-        link += '_method=GET';
-        method = "GET";
-      }
-      // Add headers as query params
-      for(var obj in headers) {
-        link += '&_' + obj + '=' + headers[obj];
+        console.warn("Error PAPI call");
+        console.log(xhr);
+        error_callback(xhr);
       }
     }
     
     // Make the actual API call in PAPIBase
-    this._super(link, data, method, success_callback, error_callback, headers, extras);
-  },
-  pre_error: function(xhr, textStatus, errorThrown) {
-    // Override to get custom response handling
-    if(console) console.log(xhr.status + " " + xhr.statusText);
-    if(console) console.log(xhr);
-    //if (console) console.log(textStatus);
-    //if (console) console.log(errorThrown);
-    if(xhr.status == 419 || xhr.status == 400 || xhr.status == 403) {
-      // Need to refresh authentication token
-
-      // Clear cookie first since LoginView check if it's valid
-      $.removeCookie('user-login', { path: '/' });
-      if(window.mainFlow) {
-        // Login view
-        window.mainFlow.fadeToWidget(0);
-      }
-    }
+    this._super(link, data, method, success_callback, error_callback_extra, headers, extras);
   },
   collect: function(link, data, method, success_callback, error_callback) {
     var urlCms = this.api_domain() + '/' + this.api_version("texts_version") + '/texts' + link;
@@ -164,29 +152,41 @@ var PAPI = PAPIBase.extend({
       // Name search
       url += '?app=' + data.app + '&context=' + data.context + '&name=' + data.name;
     }
+    
     PAPI.collect(url, null, "GET", function(res) {
-      //Fix for structure so everything is sorted on name
+      //Fix for structure so everything is sorted on app/context/name
       var result = {};
       for(var i=0; i<res.length; i++) {
         var arrayObj = res[i].text || res[i].medium;
-        result[arrayObj.name] = result[arrayObj.name] || {};
-        result[arrayObj.name][arrayObj.locale] = arrayObj;
+        result[arrayObj.app + '/' + arrayObj.context + '/' + arrayObj.name] = result[arrayObj.app + '/' + arrayObj.context + '/' + arrayObj.name] || {};
+        result[arrayObj.app + '/' + arrayObj.context + '/' + arrayObj.name][arrayObj.locale] = arrayObj;
       }
       success(result);
     }, null);
   },
   login: function(data, success_callback, error_callback) {
+    var self = this;
     var data2 = {};
     if(data.login && data.password) {
       data2.credentials = $.base64.encode(data.login + ':' + data.password);
+    } else if(data.credentials) {
+      // Re authentication where data = PAPI.user_authentication
+      data2.credentials = data.credentials;
     } else {
       if(console) console.warn("Either no login or password in data!! Could not make login!");
+    }
+
+    // Save token and credentials if needing to reauthenticate
+    var succs = function(res) {
+      $.cookie("credentials", encodeURIComponent(data2.credentials), { expires: 7, path: '/'});
+      $.cookie("token", encodeURIComponent(res.authentication.token), { expires: 7, path: '/'});
+      success_callback(res);
     }
     
     var version = this.api_version("authentications_version");
     var url = this.api_domain() + "/" + version + "/authentications";
 
-    this.apiCall(url, data2, 'POST', success_callback, error_callback, this.getHeaders({
+    this.apiCall(url, data2, 'POST', succs, error_callback, this.getHeaders({
       'X-API-Authenticate': data2.credentials
     }));
   },
@@ -207,6 +207,18 @@ var PAPI = PAPIBase.extend({
   getLogs: function(fromdate, todate, success, error) {
     var link = this.api_domain() + "/" + this.api_version("log_excerpts_version") + "/log_excerpts/" + fromdate + "/" + todate;
     this.apiCall(link, null, "GET", success, error, this.getHeaders());
+  },
+  getBroadcasts: function(success, error) {
+    var link = this.api_domain() + "/" + this.api_version("broadcasts_version") + "/broadcasts";
+    this.apiCall(link, null, "GET", success, error, this.getHeaders());
+  },
+  createSwarm: function(data, success, error, extras) {
+    var link = this.api_domain() + "/" + this.api_version("swarms_version") + "/swarms/";
+    this.apiCall(link, data, "POST", success, error, this.getHeaders(), extras);
+  },
+  createBroadcast: function(data, success, error, extras) {
+    var link = this.api_domain() + "/" + this.api_version("broadcast_version") + "/broadcasts/";
+    this.apiCall(link, data, "POST", success, error, this.getHeaders(), extras);
   },
   createRight: function(right_link, data, success, error, extras) {
     // right_link should be the rights link of a resource object that you want to create the right for, according to documentation
@@ -274,318 +286,6 @@ var HashFactory = Class.extend({
   }
 });
 
-var DragAndDropWidget = FlowPanel.extend({
-  init: function() {
-    this._super();
-    this.clickListeners = [];
-    this.focusListeners = [];
-    this.keyboardListeners = [];
-    this.loadListeners = [];
-    this.loadendListeners = [];
-    this.loadstartListeners = [];
-    this.progressListeners = [];
-    this.abortListeners = [];
-    this.errorListeners = [];
-    this.dragstartListeners = [];
-    this.dragListeners = [];
-    this.dragenterListeners = [];
-    this.dragleaveListeners = [];
-    this.dragoverListeners = [];
-    this.dropListeners = [];
-    this.dragendListeners = [];
-    this.sinkEvents(Event.ONCLICK|Event.FOCUSEVENTS|Event.KEYEVENTS|Event.ONLOAD|Event.ONLOADEND|Event.ONLOADSTART|Event.ONPROGRESS|Event.ONABORT|Event.ONERROR|Event.ONDRAGSTART|Event.ONDRAG|Event.ONDRAGENTER|Event.ONDRAGLEAVE|Event.ONDRAGOVER|Event.ONDROP|Event.ONDRAGEND);
-  },
-  addLoadListener: function(listener) {
-    this.loadListeners.push(listener);
-    return this;
-  },
-  addLoadStartListener: function(listener) {
-    this.loadstartListeners.push(listener);
-    return this;
-  },
-  addLoadEndListener: function(listener) {
-    this.loadendListeners.push(listener);
-    return this;
-  },
-  addProgressListener: function(listener) {
-    this.progressListeners.push(listener);
-    return this;
-  },
-  addAbortListener: function(listener) {
-    this.abortListeners.push(listener);
-    return this;
-  },
-  addErrorListener: function(listener) {
-    this.errorListeners.push(listener);
-    return this;
-  },
-  addClickListener: function(listener) {
-    this.clickListeners.push(listener);
-    return this;
-  },
-  addFocusListener: function(listener) {
-    this.focusListeners.push(listener);
-    return this;
-  },
-  addKeyboardListener: function(listener) {
-    this.keyboardListeners.push(listener);
-    return this;
-  },
-  addDragStartListener: function(listener) {
-    this.dragstartListeners.push(listener);
-    return this;
-  },
-  addDragListener: function(listener) {
-    this.dragListeners.push(listener);
-    return this;
-  },
-  addDragEnterListener: function(listener) {
-    this.dragenterListeners.push(listener);
-    return this;
-  },
-  addDragLeaveListener: function(listener) {
-    this.dragleaveListeners.push(listener);
-    return this;
-  },
-  addDragOverListener: function(listener) {
-    this.dragoverListeners.push(listener);
-    return this;
-  },
-  addDropListener: function(listener) {
-    this.dropListeners.push(listener);
-    return this;
-  },
-  addDragEndListener: function(listener) {
-    this.dragendListeners.push(listener);
-    return this;
-  },
-  onBrowserEvent: function(event) {
-    var type = DOM.eventGetType(event);
-
-    if (type == 'click') {
-      for (var i = 0; i < this.clickListeners.length; i++) {
-        this.clickListeners[i](this, event);
-      }
-    }
-    else if (type == 'blur' || type == 'focus') {
-      for (var i = 0; i < this.focusListeners.length; i++) {
-        this.focusListeners[i](this, event);
-      }
-    }
-    else if (type == 'keydown' || type == 'keypress' || type == 'keyup') {
-      for (var i = 0; i < this.keyboardListeners.length; i++) {
-        this.keyboardListeners[i](this, event);
-      }
-    }
-    else if (type == 'load') {
-      for (var i = 0; i < this.loadListeners.length; i++) {
-        this.loadListeners[i](this, event);
-      }
-    }
-    else if (type == 'loadend') {
-      for (var i = 0; i < this.loadendListeners.length; i++) {
-        this.loadendListeners[i](this, event);
-      }
-    }
-    else if (type == 'progress') {
-      for (var i = 0; i < this.progressListeners.length; i++) {
-        this.progressListeners[i](this, event);
-      }
-    }
-    else if (type == 'abort') {
-      for (var i = 0; i < this.abortListeners.length; i++) {
-        this.abortListeners[i](this, event);
-      }
-    }
-    else if (type == 'error') {
-      for (var i = 0; i < this.errorListeners.length; i++) {
-        this.errorListeners[i](this, event);
-      }
-    }
-    else if (type == 'drop') {
-      for (var i = 0; i < this.dropListeners.length; i++) {
-        this.dropListeners[i](this, event);
-      }
-    }
-    else if (type == 'dragenter') {
-      for (var i = 0; i < this.dragenterListeners.length; i++) {
-        this.dragenterListeners[i](this, event);
-      }
-    }
-    else if (type == 'dragleave') {
-      for (var i = 0; i < this.dragleaveListeners.length; i++) {
-        this.dragleaveListeners[i](this, event);
-      }
-    }
-    else if (type == 'dragend') {
-      for (var i = 0; i < this.dragendListeners.length; i++) {
-        this.dragendListeners[i](this, event);
-      }
-    }
-    else if (type == 'dragstart') {
-      for (var i = 0; i < this.dragstartListeners.length; i++) {
-        this.dragstartListeners[i](this, event);
-      }
-    }
-    else if (type == 'dragover') {
-      for (var i = 0; i < this.dragoverListeners.length; i++) {
-        this.dragoverListeners[i](this, event);
-      }
-    }
-  }
-});
-
-var FileWidget = DragAndDropWidget.extend({
-  init: function() {
-    this._super();
-    this.setStyleName("fileWidget");
-    this.render();
-    this.filedata = null;
-    this.data = {};
-  },
-  setText: function(text) {
-    // Must add text container that's over image area, since innerHTML will be set thus erasing the IMG tag currently
-    //this.droptext = text;
-    //DOM.setInnerText(this.imageHolder.getElement(),text);
-  },
-  showText: function(show) {
-    if(show) {
-      this.imageLabel.removeStyleName("hide");
-    } else {
-      this.imageLabel.setStyleName("hide");
-    }
-  },
-  clear: function() {
-    if(this.imageHolder.getChildren()[0]) {
-      this.imageHolder.remove(this.imageHolder.getChildren()[0]);
-      delete this.previewImage;
-    }
-    $(this.imageHolder.getElement()).removeClass("fileWidgetFull").addClass("fileWidgetEmpty");
-    this.imageNameL.setText("No file choosen...");
-    this.imageSizeL.setText("---");
-    this.showText(true);
-  },
-  setImgSrc: function(src) {
-    var self = this;
-    src = src.replace("https", "http");
-    if(!this.previewImage) this.createPreview();
-    this.showText(false);
-    this.previewImage.setUrl(src);
-
-    // Calculate real image size
-    var tmpImage = html.img({'src':src});
-    $(tmpImage).on('load', function(e) {
-      // Set Image size and show it
-      self.data.imageWidth = tmpImage.width;
-      self.data.imageHeight = tmpImage.height;
-      self.imageSizeL.setText(self.data.imageWidth + " x " + self.data.imageHeight);
-    });
-  },
-  createPreview: function() {
-    var self = this;
-    this.previewImage = new WImage();
-    this.previewImage.setStyleName("fileWidgetImage");
-    this.imageHolder.setStyleName("fileWidgetFull");
-    this.imageHolder.removeStyleName("fileWidgetEmpty");
-    this.imageHolder.add(this.previewImage);
-  },
-  setMimeType: function(data) {
-    this.data.dataMimeType = data;
-  },
-  setResult: function(data) {
-    this.data.dataResult = data;
-  },
-  setFileName: function(data) {
-    this.data.dataFileName = data;
-    this.imageNameL.setText(data);
-  },
-  setByteSize: function(data) {
-    this.data.dataByteSize = data;
-  },
-  getMimeType: function() {
-    return this.data.dataMimeType;
-  },
-  getResult: function() {
-    if(this.data.dataResult) {
-      return this.data.dataResult;
-    } else {
-      return null;
-    }
-  },
-  getFileName: function() {
-    return this.data.dataFileName;
-  },
-  getByteSize: function() {
-    return this.data.dataByteSize;
-  },
-  getImageSize: function() {
-    return {'width': this.data.imageWidth,
-            'height': this.data.imageHeight};
-  },
-  render: function() {
-    var self = this;
-    this.imageHolder = new FlowPanel();
-    this.imageLabel = new Text("Drop image here!");
-    this.imageNameL = new Text("No file choosen...");
-    this.imageSizeL = new Text("---");
-    this.fileB = new FileBox();
-    this.fileB.addChangeListener(function(widget, e) {
-      e.stopPropagation();
-      e.preventDefault();
-
-      var files = e.target.files;
-      for (var i = 0, f; f = files[i]; i++) {
-
-        // Only process image files.
-        if (!f.type.match('image.*')) {
-          continue;
-        }
-
-        if(console) console.log("Reading file:");
-        if(console) console.log(f);
-
-        var reader = new FileReader();
-
-        reader.onload = (function(file) {
-          return function(e) {
-            //src in WImage should have value: "data:image/jpg;base64,DATA"
-            self.setMimeType(file.type);
-            self.setResult(btoa(e.target.result));
-            self.setFileName(file.name);
-            self.setByteSize(file.size);
-            self.setImgSrc("data:"+file.type +";base64," + btoa(e.target.result));
-          };
-        })(f);
-        reader.readAsBinaryString(f);
-      }
-    });
-    $(this.imageHolder.getElement()).bind('dragenter', function(e) {
-      if(!self.previewImage) $(e.target).addClass("fileWidgetFull").removeClass("fileWidgetEmpty");
-    });
-    $(this.imageHolder.getElement()).bind('dragleave', function(e) {
-      if(!self.previewImage) $(e.target).removeClass("fileWidgetFull").addClass("fileWidgetEmpty");
-    });
-
-    this.fileB.setStyleName("fileWidgetInputButton");
-    
-    this.imageHolder.setStyleName("fileWidgetImageHolder fileWidgetEmpty");
-    this.imageLabel.setStyleName("fileWidgetImageLabel");
-    this.imageNameL.setStyle("margin", "5px 0px 0px 0px");
-    this.imageNameL.setStyle("font-size", "12px");
-    this.imageNameL.setWidth("200px");
-
-    this.imageSizeL.setStyle("margin", "5px 0px 0px 0px");
-    this.imageSizeL.setStyle("font-size", "10px");
-    this.imageSizeL.setWidth("200px");
-
-    this.add(this.imageHolder);
-    this.add(this.fileB);
-    this.add(this.imageLabel);
-    this.add(this.imageNameL);
-    this.add(this.imageSizeL);
-  }
-});
-
 var LoginView = FlowPanel.extend({
   init: function() {
     this._super();
@@ -607,16 +307,12 @@ var LoginView = FlowPanel.extend({
         // Success
         if(res) {
           if(res.authentication) {
-            // This is to not get rand-rpbolems in API when end-user tokens expire
+            // Save login name for future autopopulation for 300 days
             var date = new Date();
             date.setTime(date.getTime() + (30 * 60 * 1000));
-            // Save login name for future autopopulation for 300 days
             $.cookie('user-login-name', data.login, {'expires':date, 'path': '/'});
             // Clear password input field
             $('#password-input', self.getElement()).val("");
-            // Makes all json objects serialized/deserialized
-            //$.cookie.json = true;
-            $.cookie('user-login', res.authentication.token, {'expires':date, 'path': '/'});
             mainFlow.fadeToWidget(1);
           } else {
             if(console) console.warn("Authentication object were not wrapped correctly!");
@@ -642,16 +338,19 @@ var LoginView = FlowPanel.extend({
   },
   setVisible: function(visible) {
     if(visible) {
-      if($.cookie('user-login')) {
+      if($.cookie('token')) {
         mainFlow.showWidget(1);
         return;
+      } else {
+        if($.cookie('user-login-name')) {
+          this.pswI.getElement().focus();
+          this.loginI.setText($.cookie('user-login-name'));
+        } else {
+          this.loginI.getElement().focus();
+        }
+        this.cube.start();
+        document.title = "Login";
       }
-      if($.cookie('user-login-name')) {
-        // Set user name for this returning user
-        $('#login-input', this.getElement()).val($.cookie('user-login-name'));
-      }
-      this.cube.start();
-      document.title = "Login";
     } else {
       this.cube.stop();
     }
@@ -667,8 +366,8 @@ var LoginView = FlowPanel.extend({
     var fp = new FlowPanel();
     fp.setStyle("padding", "5px 30px 5px 30px");
 
-    var loginI = new TextBox();
-    var pswI = new PasswordTextBox();
+    this.loginI = new TextBox();
+    this.pswI = new PasswordTextBox();
     var headerL = new Header2("Admin Tool");
     var confirmB = new GradientButton("Confirm");
     var errorP = new FlowPanel();
@@ -685,15 +384,15 @@ var LoginView = FlowPanel.extend({
     errorP.setStyleName("");
     confirmB.setId("login-confirm-button");
     confirmB.setStyleName("gbWhite gbLarge");
-    loginI.setId("login-input");
-    pswI.setId("password-input");
+    this.loginI.setId("login-input");
+    this.pswI.setId("password-input");
     footer.setId("login-footer");
 
-    $(loginI.getElement()).attr("placeholder", "Login");
-    $(pswI.getElement()).attr("placeholder", "Password");
+    this.loginI.setAttributes({"placeholder": "Login"});
+    this.pswI.setAttributes({"placeholder": "Password"});
 
-    grid.setWidget(0,0, loginI);
-    grid.setWidget(1,0, pswI);
+    grid.setWidget(0,0, this.loginI);
+    grid.setWidget(1,0, this.pswI);
     grid.setWidget(2,0, confirmB);
 
     grid.addTableListener(function(table, e) {
@@ -800,11 +499,15 @@ var TopBar = FlowPanel.extend({
   },
   render: function() {
     var appname = window.location.pathname.slice(1);
-    var label = new Text("OceanFront ");
-    var label2 = new Text("ADMIN TOOL / " + appname.toUpperCase());
+    var label = new TextButton("OceanFront ", function() {
+      window.location = '/';
+    });
+    var label2 = new TextButton("ADMIN TOOL / " + appname.toUpperCase(), function() {
+      window.location = '/';
+    });
     var logoutB = new Button("Logout", function(e){
       // Erase login cookie
-      $.removeCookie('user-login', { path: '/' });
+      $.removeCookie('token', { path: '/' });
       // Go to LoginView
       mainFlow.fadeToWidget(0);
     });

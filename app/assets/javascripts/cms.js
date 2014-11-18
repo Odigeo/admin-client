@@ -7,76 +7,6 @@ var APIData = Class.extend({
 	}
 });
 
-var SearchList = Class.extend({
-	init: function(searchdata) {
-		this.data = searchdata;
-	},
-	getList: function() {
-		return this.data;
-	}
-});
-
-var TranslationObj = Class.extend({
-	init: function(data) {
-		for(var tmp in data) {
-			this[tmp] = data[tmp];
-			if(data[tmp].content_type) {
-				this["usagedata"] = data[tmp].content_type;
-			} else {
-				this["usagedata"] = data[tmp].usage;
-			}
-		}
-
-		//data example for texts (not media)
-		/* {sv-SE: {
-					app: "exampleappname"
-					context: "searchWidget"
-					created_at: "2012-11-06T11:13:58Z"
-          _links: { self: "http://example.com"}
-					locale: "sv-SE"
-					lock_version: 0
-					mime_type: "text/plain"
-					name: "headerMain"
-					result: "test "
-					updated_at: "2012-11-06T11:13:58Z"
-					usage: "text"
-					},
-			no-NO: {
-					app: "exampleappname"
-					context: "searchWidget"
-					created_at: "2012-11-06T11:13:58Z"
-          _links: { self: "http://example.com"}
-					locale: "no-NO"
-					lock_version: 0
-					mime_type: "text/plain"
-					name: "headerMain"
-					result: "test "
-					updated_at: "2012-11-06T11:13:58Z"
-					usage: "text"
-					}
-			}
-		*/
-	},
-	getSaveTemplate: function() {
-		return this["sv-SE"] || this["no-NO"] || this["da-DK"] || this["en-GB"];
-	},
-	usage: function() {
-		return this["usagedata"];
-	},
-	getConName: function() {
-		var tmpData = this["sv-SE"] || this["no-NO"] || this["da-DK"] || this["en-GB"];
-		if(tmpData) {
-			return tmpData.context + " " + tmpData.name;
-		} else {
-			return "";
-		}
-	},
-  getHyperlink: function(rel, locale) {
-		if(!this[locale]) return undefined;
-		return this[locale]._links[rel];
-  }
-});
-
 var CMSSearchBox = SearchBox.extend({
 	init: function(search) {
 		this._super();
@@ -172,22 +102,27 @@ var CMSSearchBox = SearchBox.extend({
 	}
 });
 
-var FlipConsole = FlowPanel.extend({
+var CreateCardPanel = FlowPanel.extend({
 	init: function() {
 		this.choice = null;
 		this._super();
 		this.render();
 		this.setId("flip-console");
 		this.dp.showWidget(0);
-	},
-	toggle: function() {
 
+		// Setup this create card depending on hash state (if we came to cms app from portal or similar)
 		if(hf.getUsage()) {
 			this.gotoUsage(hf.getUsage());
 		}
-		window.bb.toggle();
-		//this.reset();
-		$(this.getElement()).slideToggle(200);
+		// Copy values from search bar
+		if($('#app').val()) {
+			$('input[data="app"]', this.getElement()).val($('#app').val());
+		} else {
+			$('input[data="app"]', this.getElement()).val("portal-client"); // Default value
+		}
+		$('input[data="context"]', this.getElement()).val($('#context').val());
+		$('input[data="name"]', this.getElement()).val($('#name').val());
+		$('input[data="locale"]', this.getElement()).val("en-GB"); // Default value
 	},
 	gotoUsage: function(usage) {
 		if(usage === 'link') {
@@ -204,16 +139,9 @@ var FlipConsole = FlowPanel.extend({
 			this.choice = 'markdown';
 		}
 	},
-	onSave: function(self) {
+	onSave: function() {
+		var self = this;
 		var data = {};
-			/*
-			'app' : 'exampleappname',
-			'context' : 'searchWidget' + i,
-			'name' : 'headerMain',
-			'locale' : 'en-GB',
-			'mime_type' : 'text/plain',
-			'result' : "test " + i
-			*/
 
 		/* Mandatory data */
 		data['app'] = $('input[data="app"]', self.dp.visibleWidget.getElement()).val();
@@ -263,26 +191,27 @@ var FlipConsole = FlowPanel.extend({
 			if(console) console.log("Successfully created a new post!");
 			if(console) console.log(data);
 			self.showSuccess("Successfully created post!!");
+		}, function(error) {
+			// Failed
+			self.showError(error.getErrorText());
 		});
 	},
-	onClear: function(self) {
-		self.reset();
-	},
-	onClose: function(self) {
-		self.toggle();
-	},
-	reset: function() {
+	onClear: function() {
 		this.dp.showWidget(0);
-		$(".flip-console-error-label", '#flip-console').text(" ");
-		$('input', '#flip-console').val("");
-		$('textarea', '#flip-console').val("");
+		$(".flip-console-error-label", this.getElement()).text(" ");
+		//$('input', '#flip-console').val("");
+		$('textarea', this.getElement()).val("");
 		this.imageFileArea.clear();
 	},
+	onClose: function(self) {
+		this.getParent().remove(this);
+	},
 	showSuccess: function(text) {
-		$(".flip-console-error-label", this.dp.getWidget(this.dp.getVisibleWidget()).getElement()).removeClass("error-text").addClass("success-text").text(text);
+		$(".flip-console-error-label", this.dp.getVisibleWidget().getElement()).removeClass("error-text").addClass("success-text").text(text);
 	},
 	showError: function(text) {
-		$(".flip-console-error-label", this.dp.getWidget(this.dp.getVisibleWidget()).getElement()).removeClass("success-text").addClass("error-text").text(text);
+		console.log()
+		$(".flip-console-error-label", this.dp.getVisibleWidget().getElement()).removeClass("success-text").addClass("error-text").text(text);
 	},
 	render_create_markdown_view: function() {
 		var self = this;
@@ -392,8 +321,8 @@ var FlipConsole = FlowPanel.extend({
 			  
 		});
 
-		var saveB = new BonBonButton("Save", function(){self.onSave(self)}, "✓");
-		var clearB = new BonBonButton("Cancel", function(){self.onClear(self)}, "✗");
+		var saveB = new BonBonButton("Save", function(){self.onSave()}, "✓");
+		var clearB = new BonBonButton("Cancel", function(){self.onClear()}, "✗");
 		var buttonHolder = new FlowPanel();
 
 		buttonHolder.setId("flip-button-holder");
@@ -443,8 +372,8 @@ var FlipConsole = FlowPanel.extend({
 		$(inputHref.getElement()).attr("placeholder", "Link").attr('data', 'href');
 		$(inputText.getElement()).attr("placeholder", "Text").attr('data', 'text');
 
-		var saveB = new BonBonButton("Save", function(){self.onSave(self)}, "✓");
-		var clearB = new BonBonButton("Cancel", function(){self.onClear(self)}, "✗");
+		var saveB = new BonBonButton("Save", function(){self.onSave()}, "✓");
+		var clearB = new BonBonButton("Cancel", function(){self.onClear()}, "✗");
 		var buttonHolder = new FlowPanel();
 
 		buttonHolder.setId("flip-button-holder");
@@ -491,8 +420,8 @@ var FlipConsole = FlowPanel.extend({
 		var inputText = new TextArea();
 		$(inputText.getElement()).attr("placeholder", "Text").attr('data', 'text');
 
-		var saveB = new BonBonButton("Save", function(){self.onSave(self)}, "✓");
-		var clearB = new BonBonButton("Cancel", function(){self.onClear(self)}, "✗");
+		var saveB = new BonBonButton("Save", function(){self.onSave()}, "✓");
+		var clearB = new BonBonButton("Cancel", function(){self.onClear()}, "✗");
 		var buttonHolder = new FlowPanel();
 
 		buttonHolder.setId("flip-button-holder");
@@ -566,10 +495,13 @@ var CMSObject = FlowPanel.extend({
 		this.setStyleName("cms-object");
 		this.render();
 	},
+	getLocale: function() {
+		return this.locale_text.getText();
+	},
 	getResultString: function() {
-		if(this.data.usage() === "text") {
+		if(this.data.usage === "text") {
 			return $('textarea', this.getElement()).val();
-		} else if(this.data.usage() === "link") {
+		} else if(this.data.usage === "link") {
 			var text = $('input[data=text]', this.getElement()).val();
 			var href = $('input[data=href]', this.getElement()).val();
 
@@ -579,9 +511,9 @@ var CMSObject = FlowPanel.extend({
 				return null;
 			}
 			
-		} else if(this.data.usage().search('image') > -1) {
+		} else if(this.data.usage.search('image') > -1) {
 			return this.fileArea.getResult();
-		} else if(this.data.usage() === "markdown") {
+		} else if(this.data.usage === "markdown") {
 			return $('textarea', this.getElement()).val();
 		}
 	},
@@ -598,8 +530,8 @@ var CMSObject = FlowPanel.extend({
 		this.statusL.setText("Saved!");
 		$(this.statusL.getElement()).removeClass("error-text").addClass("success-text");
 	},
-	setError: function() {
-		this.statusL.setText("Failed!");
+	setError: function(text) {
+		this.statusL.setText(text);
 		$(this.statusL.getElement()).removeClass("success-text").addClass("error-text");
 	},
 	setDeleted: function() {
@@ -609,16 +541,16 @@ var CMSObject = FlowPanel.extend({
 	render_markdown: function() {
 		var text = new TextArea();
 		text.setStyleName("cms-object-textarea");
-		if(this.data[this.locale]) {
-			text.setText(this.data[this.locale].result);
+		if(this.data.result) {
+			text.setText(this.data.result);
 		}
 		this.add(text);
 	},
 	render_text: function() {
 		var text = new TextArea();
 		text.setStyleName("cms-object-textarea");
-		if(this.data[this.locale]) {
-			text.setText(this.data[this.locale].result);
+		if(this.data.result) {
+			text.setText(this.data.result);
 		}
 		this.add(text);
 	},
@@ -629,8 +561,8 @@ var CMSObject = FlowPanel.extend({
 		$(textI.getElement()).attr('placeholder', 'Text').attr('data', 'text');
 		$(hrefI.getElement()).attr('placeholder', 'Link').attr('data', 'href');
 
-		if(this.data[this.locale]) {
-			var result = this.data[this.locale].result;
+		if(this.data.result) {
+			var result = this.data.result;
 			var href = "undefined";
 			var text = "undefined";
 			// Lousy .match on just a left bracket, but for now only check to try validate correct html format =P
@@ -638,8 +570,8 @@ var CMSObject = FlowPanel.extend({
 				href = result.split('<a href="')[1].split('">')[0];
 				text = result.split('">')[1].split('</a>')[0];
 			} else {
-				if(console) console.log("Couldnt render link because not valid result data!!");
-				if(console) console.log(this.data[this.locale]);
+				if(console) console.warn("Couldnt render link because not valid result data!!");
+				if(console) console.log(this.data);
 			}
 			textI.setText(text);
 			hrefI.setText(href);
@@ -652,6 +584,7 @@ var CMSObject = FlowPanel.extend({
 
 		this.fileArea = new FileWidget();
 		this.tagsI = new TextBox();
+		this.selflinkI = new TextBox();
 		$(this.tagsI.getElement()).attr('placeholder', 'Image tags').attr('data', 'tags');
 		this.fileArea.setStyleName("fileWidget fileWidgetEmpty automargin");
 
@@ -686,29 +619,33 @@ var CMSObject = FlowPanel.extend({
 			  
 		});
 
-		if(this.data[this.locale] && this.data.getHyperlink("url", this.locale)) {
+		if(this.data._links && this.data._links.url) {
 			// Show current image for locale
-			this.fileArea.setImgSrc(this.data[this.locale]._links.url.href);
-			this.fileArea.setMimeType(this.data[this.locale].content_type);
-			this.fileArea.setFileName(this.data[this.locale].file_name);
-			this.fileArea.setByteSize(this.data[this.locale].bytesize);
-			this.tagsI.setText(this.data[this.locale].tags);
+			this.fileArea.setImgSrc(this.data._links.url.href);
+			this.fileArea.setMimeType(this.data.content_type);
+			this.fileArea.setFileName(this.data.file_name);
+			this.fileArea.setByteSize(this.data.bytesize);
+			this.tagsI.setText(this.data.tags);
+			this.selflinkI.setText(this.data._links.url.href);
 		} else {
 			//No locale did exist
 		}
 		this.add(this.fileArea);
 		this.add(this.tagsI);
+		this.add(this.selflinkI);
 	},
 	render: function() {
-		var nameText = new Text(this.locale);
+		this.locale_text = new TextBox();
 		this.statusL = new Text("");
 
 		this.statusL.setStyleName("cms-object-status error-text");
-		nameText.setStyleName("padding10 relief-shadow");
-		this.add(nameText);
+		this.locale_text.setStyleName("cms-object-locale");
 
+		this.locale_text.setText(this.locale);
+
+		this.add(this.locale_text);
 		if(this.data) {
-			switch(this.data.usage()) {
+			switch(this.data.usage) {
 				case "text": this.render_text(); break;
 				case "link": this.render_link(); break;
 				case "markdown": this.render_markdown(); break;
@@ -723,15 +660,22 @@ var CMSCardPanel = FlowPanel.extend({
 	init: function(data) {
 		this._super();
 		this.setStyleName("cms-card-panel");
-		this.translations = new TranslationObj(data);
+		this.data = data;
+		// These get populated in render when we loop thru the data
+		this.app = "";
+		this.context = "";
+		this.name = "";
+		this.usage = "";
 		this.CMSObjects = [];
 		this.render();
 	},
-	onSave: function(cmsobj, self) {
-		if(self.translations[cmsobj.locale]) {
-			// Locale post already exist, do a save
+	onSave: function(cmsobj) {
+		var self = this;
+		// Check if cmsobject got data set, which means it is an old previous data object from API, otherwise it is a new container opened by user so it is a brand new data for a locale
+		if(cmsobj.data._links) {
+			// Data already exist, do a save
 
-			var data = self.translations[cmsobj.locale];
+			var data = cmsobj.data;
 
 			if(cmsobj.getFileArea()) {
 				//Image saved
@@ -744,7 +688,7 @@ var CMSCardPanel = FlowPanel.extend({
 				data.payload = fileArea.getResult();
 				data.usage = 'image';
 				data.locale = cmsobj.locale;
-			} else if(self.translations.usage() === "markdown") {
+			} else if(cmsobj.data.usage === "markdown") {
 				data.markdown = true;
 				data.locale = cmsobj.locale;
 				data.result = cmsobj.getResultString();
@@ -754,19 +698,31 @@ var CMSCardPanel = FlowPanel.extend({
 			}
 			
 			cmsobj.setNoText();
-			PAPI._save(self.translations[cmsobj.locale]._links["self"].href, data, function(res) {
+			PAPI._save(data._links["self"].href, data, function(res) {
 				if (console) console.log("Successfully saved for locale: " + cmsobj.locale);
 				cmsobj.setSuccess();
-			}, function(res) {
+			}, function(error) {
 				if (console) console.log("Error saving for locale: " + cmsobj.locale);
-				cmsobj.setError();
+				if (console) console.log(error.getErrorText());
+				cmsobj.setError(error.getErrorText());
 			});
-		} else if (cmsobj.getResultString()) {
+		} else  {
 			// Create a new post for this locale since it got a value but didnt exist previously
-			//Take any current translation post
-			var data = self.translations.getSaveTemplate();
+			// Copy same values like app, context, name
+			var data = {};
+			data.app = this.app;
+			data.context = this.context;
+			data.name = this.name;
+			data.usage = this.usage;
+			// Set service for PAPI to know what resource we create
+			if(this.usage === "") {
+				// TODO Fix so its === "image", but right now media service doesnt save usage attribute =(
+				data.service = "media";
+			} else {
+				data.service = "texts";
+			}
 
-			if(cmsobj.getFileArea()) {
+			if(data.usage === "") {
 				//Image saved
 				var fileArea = cmsobj.getFileArea();
 
@@ -775,17 +731,18 @@ var CMSCardPanel = FlowPanel.extend({
 				data.bytesize = fileArea.getByteSize();
 				data.content_type = fileArea.getMimeType();
 				data.payload = fileArea.getResult();
-				data.usage = 'image';
-				data.locale = cmsobj.locale;
-			} else if(self.translations.usage() === "markdown") {
+				data.mimetype = fileArea.getMimeType();
+				data.locale = cmsobj.getLocale();
+			} else if(data.usage === "markdown") {
 				data.markdown = true;
-				data.locale = cmsobj.locale;
+				data.locale = cmsobj.getLocale;
 				data.result = cmsobj.getResultString();
 			} else {
 				//Set new locale and result we wanna create
-				data.locale = cmsobj.locale;
+				data.locale = cmsobj.getLocale;
 				data.result = cmsobj.getResultString();
 			}
+			console.log(data);
 
 			cmsobj.setNoText();
 			PAPI._create(data, function(res) {
@@ -794,9 +751,10 @@ var CMSCardPanel = FlowPanel.extend({
 				//Should update self.translations with the created locale and its data so a Save will occur on next onSave instead of Create
 				//Right now the cms-service doestn return the created object, hence data below is a cop of another locale so the self.link is wrong
 				//self.translations[cmsobj.locale] = data;
-			}, function(res) {
-				if (console) console.log("Error saving for locale: " + cmsobj.locale);
-				cmsobj.setError();
+			}, function(error) {
+				if (console) console.log("Error creating for locale: " + cmsobj.locale);
+				if (console) console.log(error.getErrorText());
+				cmsobj.setError(error.getErrorText());
 			}); 
 		}
 	},
@@ -806,86 +764,102 @@ var CMSCardPanel = FlowPanel.extend({
 	onClear: function(self) {
 
 	},
-	onDelete: function(cmsobj, self) {
-		if(cmsobj.data[cmsobj.locale]) {
+	onDelete: function(cmsobj) {
+		var self = this;
+		if(cmsobj.data) {
 			
-			PAPI._delete(self.translations.getHyperlink("self", cmsobj.locale).href, function(res) {
+			PAPI._delete(cmsobj.data._links.self.href, function(res) {
 				if (console) console.log("Successfully DELETED locale!!");
 				cmsobj.setDeleted();
-				self.deleteCounter += 1;
+				self.deleteCounter -= 1;
 
-				if(self.deleteCounter > 3) {
+				if(self.deleteCounter <= 0) {
 					self.setStyleName("cms-card-animation");
 				}
-			}, function(res) {
+			}, function(error) {
 				if (console) console.log("Failed to DELETE");
-				cmsobj.setError();
+				if (console) console.log(error.getErrorText());
+				cmsobj.setError(error.getErrorText());
 
 			});
 		} else {
-			self.deleteCounter += 1;
+			self.deleteCounter -= 1;
 		}
-
-		// Since there are 1 or more asynchronous calls that counts, this is just a catch up in rare case
-		// that the asynchronous calls would be faster than not doing a call (i.e. should not be possible, but still)
-		if(self.deleteCounter > 3) {
-			self.setStyleName("cms-card-animation");
-		}
+	},
+	onAdd: function() {
+		var data = {};
+		data.app = this.app;
+		data.context = this.context;
+		data.name = this.name;
+		data.usage = this.usage;
+		var cmsobj = new CMSObject("enter locale", data);
+		this.CMSObjects.push(cmsobj);
+		this.holder.add(cmsobj);
 	},
 	render: function() {
 		var self = this;
-		var header = new Text(this.translations.getConName());
-		var holder = new HorizontalPanel();
+		this.holder = new FlowPanel();
 		var closeHolder = new FlowPanel();
 		//var closeText = new Text("Close");
-		var closeB = new GradientButton("X", function(){self.setStyleName("cms-card-animation");});
-		var deleteB = new BonBonButton("Delete", function(){
+		var closeB = new GradientButton("X", function() {self.setStyleName("cms-card-animation");});
+		var deleteB = new BonBonButton("Delete", function() {
 			var confirm = window.confirm("This will permanently delete object!");
 			if(confirm) {
-				self.deleteCounter = 0;
+				self.deleteCounter = self.CMSObjects.length; // For animating when all asynchronous calls are finished
 				for (var i = 0; i < self.CMSObjects.length; i++) {
-					self.onDelete(self.CMSObjects[i], self);
+					self.onDelete(self.CMSObjects[i]);
 				}
 			}
 		}, "✗");
-		$(deleteB.getElement()).attr('task', 'delete');
-
-		closeB.setStyleName("closeButton right");
-		//closeText.setStyleName("close-label right");
-		closeHolder.setStyleName("close-holder");
-		header.setStyleName("padding10 large strong relief-shadow");
-		closeHolder.add(closeB);
-		//closeHolder.add(closeText);
-		this.add(closeHolder);
-		this.add(header);
-
-		this.CMSObjects.push(new CMSObject("en-GB", this.translations));
-		this.CMSObjects.push(new CMSObject("sv-SE", this.translations));
-		this.CMSObjects.push(new CMSObject("no-NO", this.translations));
-		this.CMSObjects.push(new CMSObject("da-DK", this.translations));
-
-		holder.add(this.CMSObjects[0]);
-		holder.add(this.CMSObjects[1]);
-		holder.add(this.CMSObjects[2]);
-		holder.add(this.CMSObjects[3]);
-		this.add(holder);
-
+		var addB = new BonBonButton("Add locale", function() {
+			self.onAdd();
+		}, "+");
 		var saveB = new BonBonButton("Save", function(){
 			for (var i = 0; i < self.CMSObjects.length; i++) {
 				self.onSave(self.CMSObjects[i], self);
 			}
 		}, "✓");
-		var cancelB = new BonBonButton("Cancel", function(){self.setStyleName("cms-card-animation");}, "∅");
+		var cancelB = new BonBonButton("Cancel", function() {self.setStyleName("cms-card-animation");}, "∅");
+		var buttonPanel = new FlowPanel();
+		// Create CMSObejects and store the pointers in array holder
+		for(var key in this.data) {
+			this.CMSObjects.push(new CMSObject(key, this.data[key]));
+		}
+		// Add CMSObjects to DOM tree
+		for (var i = 0; i < this.CMSObjects.length; i++) {
+			this.holder.add(this.CMSObjects[i]);
+		}
+		// copy first CMS objects common attribtues for this Card, so it can be used automatically when we Add more locales for the same Card
+		this.app = this.CMSObjects[0].data.app;
+		this.context = this.CMSObjects[0].data.context;
+		this.name = this.CMSObjects[0].data.name;
+		this.usage = this.CMSObjects[0].data.usage;
+		var header = new Text(" " + this.app + "  -  " +this.context + "  -  " + this.name + " ");
 
+		$(deleteB.getElement()).attr('task', 'delete');
+
+		closeB.setStyleName("closeButton right");
+		closeHolder.setStyleName("close-holder");
 		saveB.setStyleName("bbGreen bbSmall relief-shadow");
 		cancelB.setStyleName("bbOrange bbSmall relief-shadow");
 		deleteB.setStyleName("bbPink bbSmall relief-shadow");
+		addB.setStyleName("bbBlue bbSmall relief-shadow");
+		header.setStyleName("padding10 large relief-shadow");
+		buttonPanel.setStyleName("cms-card-panel-button-panel");
+		this.holder.setStyleName("cms-card-holder");
 
-		var buttonPanel = new FlowPanel();
+		
+
 		buttonPanel.add(deleteB);
 		buttonPanel.add(cancelB);
 		buttonPanel.add(saveB);
-		buttonPanel.setStyleName("cms-card-panel-button-panel");
+		buttonPanel.add(addB);
+		
+		closeHolder.add(closeB);
+
+		this.add(closeHolder);
+		this.add(header);
+		this.add(this.holder);
 		this.add(buttonPanel);
 
 		$(this.getElement()).on("webkitTransitionEnd", function(e){
@@ -904,9 +878,6 @@ var InstrumentPanel = FlowPanel.extend({
 		this.data = {};
 		this.render();
 	},
-	onCreate: function(flip) {
-		flip.toggle();
-	},
 	onSearch: function() {
 		var self = this;
 		var data = {};
@@ -921,24 +892,22 @@ var InstrumentPanel = FlowPanel.extend({
 		this.loader.show();
 		//Do search
 		PAPI.search(data, function(data) {
-			//if (console) console.log(data);
-			window.uiview.clear();
-			window.uiview.createCards(new SearchList(data));
+			window.uiview.createCards(data);
 			self.loader.hide();
 		},
-		function(res) {
+		function(error) {
 			// Fail
+			if (console) console.log(error.getErrorText());
 			self.loader.hide();
 		});
 	},
 	render: function() {
 		var self = this;
 		var holder = new HorizontalPanel();
-		var flip = new FlipConsole();
-		var createB = new BonBonButton("Create item",  function(){self.onCreate(flip);}, "✎");
+		var createB = new BonBonButton("Create item",  function(){window.uiview.addCreateCard()}, "✎");
 		var selectL = new Text("Select");
 
-		selectL.setStyleName("relief-shadow d5 l10");
+		selectL.setStyleName("relief-shadow console-label");
 		createB.setStyleName("bbSmall");
 		createB.setId("console-createB");
 		holder.setStyleName("automargin");
@@ -981,7 +950,6 @@ var InstrumentPanel = FlowPanel.extend({
 
 		this.add(this.loader);
 		this.add(holder);
-		this.add(flip);
 	}
 });
 
@@ -1008,12 +976,14 @@ var UIView = FlowPanel.extend({
 		}
 		this._super(bool);
 	},
-	createCards: function (searchdata) {
+	createCards: function (data) {
 		this.clear();
-		var list = searchdata.getList();
-		for(var obj in list) {
-			this.cardHolder.add(new CMSCardPanel(list[obj]));
+		for(var obj in data) {
+			this.cardHolder.add(new CMSCardPanel(data[obj]));
 		}
+	},
+	addCreateCard: function() {
+		this.cardHolder.addFirst(new CreateCardPanel());
 	},
 	createDummies: function () {
 		for (var i = 0; i <= 1000; i++) {

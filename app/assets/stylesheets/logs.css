@@ -7,6 +7,17 @@ body {
 	-webkit-user-select: none;
 }
 
+.small-button {
+	float: left;
+	padding: 8px;
+	margin: 5px;
+	font-size: 16px;
+}
+
+.selected {
+	background-color: #999;
+}
+
 .service-button-selected {
 	background-color: #9D58C2;
 }
@@ -16,12 +27,17 @@ body {
 	background-color: #ccc;
 }
 
+#date-grid {
+	margin: 0px 0px 0px 220px;
+}
+
 #date-grid td {
 	padding: 0px 5px 0px 5px
 }
 
 #date-panel-arrow {
 	font-size: 20px;
+	padding: 10px 5px 10px 5px;
 }
 
 #date-grid input {
