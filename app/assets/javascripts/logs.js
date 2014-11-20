@@ -31,7 +31,7 @@ var DatePanel = FlowPanel.extend({
 		this.setId("date-panel");
 		this.render();
 	},
-	getLogs: function(direction) {
+	onDirectionKey: function(direction) {
 		var self = this;
 
 		console.log("Getting logs...");
@@ -43,7 +43,7 @@ var DatePanel = FlowPanel.extend({
 		if(from_value != "" && to_value != "" && from != "Invalid Date" && to != "invalid Date") {
 			// Save values in cookie
 			var date = new Date();
-      date.setTime(date.getTime() + (356 * 24 * 60 * 60 * 1000));
+      		date.setTime(date.getTime() + (356 * 24 * 60 * 60 * 1000));
 			$.cookie('logs-fromdate', from_value, {'expires':date, 'path': '/'});
 			$.cookie('logs-todate', to_value, {'expires':date, 'path': '/'});
 
@@ -79,12 +79,62 @@ var DatePanel = FlowPanel.extend({
 			});
 		}
 	},
+	onTailButton: function() {
+		var self = this;
+		if(!this.tailtoggle) {
+			this.tail.addStyleName("selected");
+			this.tailtoggle = true;
+			this.tailInterval = setInterval(function(){self.onHourButton(0.5, true);}, 1000); // Update with 30min back in time as window
+		} else {
+			this.tail.removeStyleName("selected");
+			this.tailtoggle = false;
+			clearInterval(this.tailInterval);
+		}
+	},
+	onHourButton: function(hours, hide_loader) {
+		var now = new Date();
+		var then = new Date(now - hours * 60 * 60 * 1000); // set time backwards number of hours
+
+		this.fromdate.setText(new Date(then.valueOf() - then.getTimezoneOffset()*60*1000).toISOString().replace("T", " ").replace("Z", ""));
+		this.todate.setText(new Date(now.valueOf() - now.getTimezoneOffset()*60*1000).toISOString().replace("T", " ").replace("Z", ""));
+		this.onSearch(hide_loader);
+	},
+	onSearch: function(hide_loader) {
+		// Make PAPI call
+		var self = this;
+		var from_epoch = new Date(this.fromdate.getText()).getTime();
+		var to_epoch = new Date(this.todate.getText()).getTime();
+		if(!hide_loader) {
+			self.loader.show();
+		}
+		PAPI.getLogs(from_epoch, to_epoch, function(res) {
+			window.logpanel.clearLog();
+			window.logpanel.setNewLogResult(res);
+			self.loader.hide();
+		},
+		function(res) {
+			// Fail
+			self.loader.hide();
+		});
+	},
 	render: function() {
 		var self = this;
-		var fromdate = new TextBox();
-		var todate = new TextBox();
+		this.fromdate = new TextBox();
+		this.todate = new TextBox();
 		var arrow = new Label("➜");
 		var searchI = new SearchBox();
+		this.tail = new TextButton("Tail", function() {
+			self.onTailButton();
+		});
+		var one = new TextButton("1h", function() {
+			self.onHourButton(1);
+		});
+		var three = new TextButton("3h", function() {
+			self.onHourButton(3);
+		});
+		var six = new TextButton("6h", function() {
+			self.onHourButton(6);
+		});
 		var forwardButton = new GradientButton("≫", function(e){
 			/* Not fired because Table Listener in Grid */
 		});
@@ -96,14 +146,18 @@ var DatePanel = FlowPanel.extend({
 		var cookie_fromdate = $.cookie('logs-fromdate');
 		var cookie_todate = $.cookie('logs-todate');
 
-		$(fromdate.getElement()).attr('type', 'text').attr('data', 'fromdate').attr('placeholder', 'From date and/or time').addClass('date-field').val(cookie_fromdate);
-		$(todate.getElement()).attr('type', 'text').attr('data', 'todate').attr('placeholder', 'To date and/or time').addClass('date-field').val(cookie_todate);
-		$(searchI.getElement()).attr('placeholder', 'Filter..').attr('type', 'search').attr('autocomplete', 'on').attr('results', '5').attr('autosave',  'filter_history');
-		$(backButton.getElement()).attr('name', 'back').addClass("date-panel-navigate-button");
-		$(forwardButton.getElement()).attr('name', 'forward').addClass("date-panel-navigate-button");
+		this.fromdate.setAttributes({'type':'text', 'data':'fromdate', 'placeholder':'From date and/or time'}).setStyleName('date-field').setText(cookie_fromdate);
+		this.todate.setAttributes({'type':'text', 'data':'todate', 'placeholder':'To date and/or time'}).setStyleName('date-field').setText(cookie_todate);
+		searchI.setAttributes({'placeholder':'Filter..', 'type':'search', 'autocomplete':'on', 'results':'5', 'autosave':'filter_history'});
+		backButton.setAttributes({'name':'back'}).setStyleName("date-panel-navigate-button");
+		forwardButton.setAttributes({'name':'forward'}).setStyleName("date-panel-navigate-button");
 		arrow.setId("date-panel-arrow");
 		grid.setId("date-grid");
 		searchI.setId("date-panel-search");
+		one.setStyleName("small-button gradientButton");
+		three.setStyleName("small-button gradientButton");
+		six.setStyleName("small-button gradientButton");
+		this.tail.setStyleName("small-button gradientButton");
 
 		searchI.addKeyboardListener(function(that, e) {
 			var type = e.type;
@@ -121,9 +175,9 @@ var DatePanel = FlowPanel.extend({
 		});
 
 		grid.setWidget(0,0,backButton);
-		grid.setWidget(0,1,fromdate);
+		grid.setWidget(0,1,this.fromdate);
 		grid.setWidget(0,2,arrow);
-		grid.setWidget(0,3,todate);
+		grid.setWidget(0,3,this.todate);
 		grid.setWidget(0,4,forwardButton);
 
 		grid.addTableListener(function(table, e) {
@@ -131,13 +185,17 @@ var DatePanel = FlowPanel.extend({
 
 			if(e.keyCode == 13) {
 				//Enter key pressed
-				self.getLogs();
+				self.onDirectionKey();
 			} else if(e.type === "click" && ($(target).attr('name') === "forward" || $(target).attr('name') === "back")) {
 				// Forward/Backwards button pressed
-				self.getLogs($(target).attr('name'));
+				self.onDirectionKey($(target).attr('name'));
 			}
 		});
 
+		this.add(this.tail);
+		this.add(one);
+		this.add(three);
+		this.add(six);
 		this.add(searchI);
 		this.add(grid);
 	}
@@ -157,7 +215,7 @@ var RowItem = FocusWidget.extend({
 	},
 	getMsg: function() {
 		if(this.data.msg) {
-			return this.data.msg;
+			return this.data.msg + " ";
 		} else {
 			return "";
 		}
@@ -185,7 +243,21 @@ var RowItem = FocusWidget.extend({
 	},
 	getRemoteIP: function() {
 		if(this.data.remote_ip) {
-			return this.data.remote_ip + " ";
+			return "from " + this.data.remote_ip + " ";
+		} else {
+			return "";
+		}
+	},
+	getIP: function() {
+		if(this.data.ip) {
+			return this.data.ip + " ";
+		} else {
+			return "";
+		}
+	},
+	getUsername: function() {
+		if(this.data.username) {
+			return this.data.username + " ";
 		} else {
 			return "";
 		}
@@ -244,7 +316,7 @@ var RowItem = FocusWidget.extend({
 		}
 		// Make it ISO string with the time offset and remove T and Z character that indicate time is in UTC (we form it in local time)
 		var datestring = new Date(dateobj.valueOf() - dateobj.getTimezoneOffset()*60*1000).toISOString().replace("T", " ").replace("Z", "");
-		var row = this.getService() + tab_string + datestring + "  " + level + "\t" + this.getMethod() + this.getStatus() + this.getPath() + this.getRemoteIP() + this.getMsg() + "\n";
+		var row = this.getService() + tab_string + datestring + "  " + level + "\t" + this.getMethod() + this.getStatus() + this.getPath() + this.getUsername() + this.getMsg() + this.getIP() + this.getRemoteIP() + "\n";
 		return row;
 	},
 	render: function() {

@@ -9,6 +9,13 @@ html {
 	overflow-y: scroll;
 }
 
+.create-error-label {
+	color: red;
+	min-height: 10px;
+	text-align: center;
+	margin: 10px 0px 0px 0px;
+}
+
 .drag-drop-icon {
 	background-image: url('../images/admin/drop_arrow.png');
 	width: 70px;
@@ -293,15 +300,19 @@ html {
 	margin: 270px auto 0px auto;
 	background-image: -webkit-linear-gradient(top, #DBDBDB 0%, #B0B0B0 100%);
 	box-shadow: 0px 8px 18px #333;
-	padding: 20px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
 	border: 1px solid #333;
 	border-radius: 4px;
 }
 
+.popup-box .of-DeckPanel > div {
+	padding: 20px 0px 0px 0px;
+}
+
 .popup-box-close-button {
 	position: absolute;
-	top: 7px;
-	left: 620px;
+	right: 10px;
+	top: 10px;
 }
 
 .create-grid {
@@ -312,7 +323,7 @@ html {
 	width: 200px;
 }
 
-.create-grid tr td {
+.create-grid tr td, .create-grid tr th {
 	padding: 10px 0px 0px 10px;
 }
 
@@ -321,12 +332,16 @@ html {
 	border: 2px inset;
 }
 
-#creatorPopup {
+#popup {
 	/*width: 150px;
 	height: 100px;*/
-	position: absolute;
-	display: block;
+	position: fixed;
 	z-index: 10000;
+	font-size: 18px;
+	color: #000;
+	padding: 5px;
+	background-color: #999;
+	text-shadow: none;
 }
 
 ::-webkit-validation-bubble {

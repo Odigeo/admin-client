@@ -105,10 +105,10 @@ var TopConsole = FlowPanel.extend({
 				// Implement fetching of creator link and show it in hover popup next to mouse
 
 				// Show CreatorPopup if it's not currently showing (avoiding super spam)
-				if(!window.creatorPopup.isShowing) {
+				if(!window.popup.isShowing) {
 					PAPI._get(self.currentSelectedItem.getLink("creator").replace("https", "http"), function(res) {
 						// Success
-						window.creatorPopup.setUser(res["api_user"]);
+						window.popup.setUser(res["api_user"]);
 					},
 					function(res) {
 						// Fail
@@ -465,6 +465,16 @@ var BoxItem = DragAndDropWidget.extend({
 		this.addClickListener(function(that, e) {
 			window.tc.selectedItem(self);
 			window.tc.mainFlow.fadeToWidget(1);
+		});
+		this.addMouseOverListener(function(that, e) {
+			if(self.data.name) {
+				window.popup.setText(self.data.name);
+			} else if (self.data.username) {
+				window.popup.setText(self.data.username);
+			}
+		});
+		$(this.getElement()).on('mouseout', function(e){
+		    window.popup.clearAll();
 		});
 		$(self.getElement()).on('webkitAnimationEnd', function(e) {
 			// Stop animation when done
@@ -905,8 +915,8 @@ var CreateBox = FlowPanel.extend({
 		var cancelB = new BonBonButton("Cancel", function(){}, "✗");
 		saveB.setStyleName("bbGreen bbSmall");
 		cancelB.setStyleName("bbPink bbSmall");
-		$(saveB.getElement()).attr('name', 'save').attr('type', 'submit');
-		$(cancelB.getElement()).attr('name', 'cancel').attr('type', 'button');
+		saveB.setAttributes({'name':'save', 'type':'button'});
+		cancelB.setAttributes({'name':'cancel', 'type':'button'});
 		var header = new Header2("Create new user");
 
 		// User special label inputs
@@ -1045,7 +1055,7 @@ var CreateBox = FlowPanel.extend({
 		var cancelB = new BonBonButton("Cancel", function(){}, "✗");
 		saveB.setStyleName("bbGreen bbSmall");
 		cancelB.setStyleName("bbPink bbSmall");
-		$(saveB.getElement()).attr('name', 'save').attr('type', 'submit');
+		$(saveB.getElement()).attr('name', 'save').attr('type', 'button');
 		$(cancelB.getElement()).attr('name', 'cancel').attr('type', 'button');
 		var header = new Header2("Create a new Group");
 
@@ -1134,7 +1144,7 @@ var CreateBox = FlowPanel.extend({
 		var cancelB = new BonBonButton("Cancel", function(){}, "✗");
 		saveB.setStyleName("bbGreen bbSmall");
 		cancelB.setStyleName("bbPink bbSmall");
-		$(saveB.getElement()).attr('name', 'save').attr('type', 'submit');
+		$(saveB.getElement()).attr('name', 'save').attr('type', 'button');
 		$(cancelB.getElement()).attr('name', 'cancel').attr('type', 'button');
 		var header = new Header2("Create a new Role");
 
@@ -1223,7 +1233,7 @@ var CreateBox = FlowPanel.extend({
 		var cancelB = new BonBonButton("Cancel", function(){}, "✗");
 		saveB.setStyleName("bbGreen bbSmall");
 		cancelB.setStyleName("bbPink bbSmall");
-		$(saveB.getElement()).attr('name', 'save').attr('type', 'submit');
+		$(saveB.getElement()).attr('name', 'save').attr('type', 'button');
 		$(cancelB.getElement()).attr('name', 'cancel').attr('type', 'button');
 		var header = new Header2("Create a new Right");
 		var errorText = new Text("");
@@ -1385,6 +1395,9 @@ var CreateBox = FlowPanel.extend({
 	hide: function() {
 		this.setStyle("display", "none");
 	},
+	onCancel: function() {
+		this.hide();
+	},
 	show: function(what) {
 		if(what === "USERS") {
 			this.mainFlow.showWidget(0);
@@ -1399,26 +1412,6 @@ var CreateBox = FlowPanel.extend({
 			this.mainFlow.showWidget(3);
 			this.setStyle("display", "block");
 		}
-	},
-	onSave: function() {
-		var inputs = $('input', this.mainFlow.visibleWidget.getElement());
-
-		var valid = true;
-		for(var i=0; i<inputs.length; i++) {
-			if(!this.validate(inputs[i])) {
-				valid = false;
-			}
-		}
-
-		if(valid) {
-			// Do PAPI save
-			console.log("Everything valid, saving");
-		} else {
-			console.log("Something is not right, skipping save!");
-		}
-	},
-	onCancel: function() {
-		this.hide();
 	},
 	render: function() {
 		var self = this;
@@ -1509,30 +1502,50 @@ var UsersView = FlowPanel.extend({
 	}
 });
 
-var CreatorPopup = FlowPanel.extend({
+var MouseOverPopup = FlowPanel.extend({
 	init: function() {
 		// Shows creator User on mouse hover of selected items creator-datetime
 		this._super();
 		var self = this;
 		this.isShowing = false;
-		this.setId("creatorPopup");
+		this.setVisible(false);
+		this.setId("popup");
 		$(document).on('mousemove', function(e){
 		    $(self.getElement()).css({
-		       left:  e.pageX,
-		       top:   e.pageY - 200
+		       left:  e.pageX + 40,
+		       top:   e.pageY + 40
 		    });
 		});
+		this.render();
+	},
+	setText: function(text) {
+		this.container.clear();
+		this.container.add(new Text(text));
+		this.show();
 	},
 	setUser: function(user) {
+		this.container.clear();
+		this.container.add(new UserItem(user));
+		this.show();
+	},
+	show: function() {
 		this.isShowing = true;
+		this.setVisible(true);
 		var self = this;
-		this.add(new UserItem(user));
-		setTimeout(function() {self.clearAll();}, 1000);
+		this.fn = function() {self.clearAll();}
+		setTimeout(this.fn, 10000);
 	},
 	clearAll: function() {
-		this.clear();
+		this.container.clear();
+		this.setVisible(false);
 		//$(document).unbind('mousemove');
+		clearTimeout(this.fn);
 		this.isShowing = false;
+	},
+	render: function() {
+		this.container = new FlowPanel();
+
+		this.add(this.container);
 	}
 });
 
@@ -1547,18 +1560,17 @@ $(document).ready(function() {
 
 	var fp = new UsersView();
 	var createBox = new CreateBox();
-	var creatorPopup = new CreatorPopup();
+	var popup = new MouseOverPopup();
 	var login = new LoginView();
 	window.createBox = createBox;
-	window.creatorPopup = creatorPopup;
+	window.popup = popup;
 
 	mainFlow.add(login);
 	mainFlow.add(fp);
 	mainFlow.showWidget(0);
 
 	wrapper.add(mainFlow);
-	root.add(creatorPopup);
+	root.add(popup);
 	root.add(wrapper);
 	root.add(createBox);
-
 });
