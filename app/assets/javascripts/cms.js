@@ -735,14 +735,16 @@ var CMSCardPanel = FlowPanel.extend({
 				data.locale = cmsobj.getLocale();
 			} else if(data.usage === "markdown") {
 				data.markdown = true;
-				data.locale = cmsobj.getLocale;
+				data.locale = cmsobj.getLocale();
 				data.result = cmsobj.getResultString();
+				data.mime_type = "text/x-markdown";
 			} else {
 				//Set new locale and result we wanna create
-				data.locale = cmsobj.getLocale;
+				data.locale = cmsobj.getLocale();
 				data.result = cmsobj.getResultString();
+				data.mime_type = "text/plain";
 			}
-			console.log(data);
+
 
 			cmsobj.setNoText();
 			PAPI._create(data, function(res) {
