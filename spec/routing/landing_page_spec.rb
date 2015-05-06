@@ -20,20 +20,20 @@ describe "Routing to the root path" do
   # end
   
   it "should not accept POST requests" do
-    { :post => "/"}.should_not be_routable
-    { :post => "/something"}.should_not be_routable
+    expect({ :post => "/"}).not_to be_routable
+    expect({ :post => "/something"}).not_to be_routable
   end
   
   
   it "should not accept PUT requests" do
-    { :put => "/"}.should_not be_routable
-    { :put => "/something"}.should_not be_routable
+    expect({ :put => "/"}).not_to be_routable
+    expect({ :put => "/something"}).not_to be_routable
   end
   
   
   it "should not accept DELETE requests" do
-    { :delete => "/"}.should_not be_routable
-    { :delete => "/something"}.should_not be_routable
+    expect({ :delete => "/"}).not_to be_routable
+    expect({ :delete => "/something"}).not_to be_routable
   end
   
 end

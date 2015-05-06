@@ -35,7 +35,7 @@ describe "cms" do
     @b.text_field(:id, "name").set("test1")
     @b.send_keys :enter
     @b.div(:class, "cms-card-panel").wait_until_present
-    @b.textarea(:class => "cms-object-textarea", :index => 1).value.should == "This is a test for test agent, RSpec!"
+    expect(@b.textarea(:class => "cms-object-textarea", :index => 1).value).to eq("This is a test for test agent, RSpec!")
   end
 
   it "should be able to search and read a link object" do
@@ -45,8 +45,8 @@ describe "cms" do
     @b.text_field(:id, "name").set("test2")
     @b.send_keys :enter
     @b.div(:class, "cms-card-panel").wait_until_present
-    @b.div(:class => "cms-object", :index => 1).text_field(:placeholder, "Text").value.should == "blahonga link"
-    @b.div(:class => "cms-object", :index => 1).text_field(:placeholder, "Link").value.should == "#!test=hej"
+    expect(@b.div(:class => "cms-object", :index => 1).text_field(:placeholder, "Text").value).to eq("blahonga link")
+    expect(@b.div(:class => "cms-object", :index => 1).text_field(:placeholder, "Link").value).to eq("#!test=hej")
   end
 
   it "should be able to search and read a markdown object" do
@@ -56,7 +56,7 @@ describe "cms" do
     @b.text_field(:id, "name").set("test3")
     @b.send_keys :enter
     @b.div(:class, "cms-card-panel").wait_until_present
-    @b.textarea(:class => "cms-object-textarea", :index => 1).value.should == "# Header1"
+    expect(@b.textarea(:class => "cms-object-textarea", :index => 1).value).to eq("# Header1")
   end
 
   it "should be able to search and read a image object" do
@@ -67,7 +67,7 @@ describe "cms" do
     @b.send_keys :enter
     @b.div(:class, "cms-card-panel").wait_until_present
     @b.div(:class => "cms-object", :index => 1).img(:class, "fileWidgetImage").exists?
-    @b.div(:class => "cms-object", :index => 1).text_field(:placeholder, "Image tags").value.should == "blond, woman"
+    expect(@b.div(:class => "cms-object", :index => 1).text_field(:placeholder, "Image tags").value).to eq("blond, woman")
   end
 
 end

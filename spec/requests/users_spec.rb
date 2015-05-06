@@ -21,7 +21,7 @@ describe "users" do
     do_login
     @b.div(:id => "USERS-container").div(:class => "box-item user-item").wait_until_present
     @b.div(:id => "USERS-container").text_field(:placeholder => "Search").set("god")
-    @b.div(:id => "USERS-container").div(:class => "box-item-label").text.should == "god"
+    expect(@b.div(:id => "USERS-container").div(:class => "box-item-label").text).to eq("god")
   end
 
   it "should be able to click on a api_user" do
@@ -30,7 +30,7 @@ describe "users" do
     @b.div(:id => "USERS-container").text_field(:placeholder => "Search").set("god")
     @b.div(:id => "USERS-container").div(:class => "box-item-label").click
     @b.text_field(:name => "username").wait_until_present
-    @b.text_field(:name => "username").value.should == "god"
+    expect(@b.text_field(:name => "username").value).to eq("god")
   end
 
   it "should be possible to open create popup" do
@@ -38,7 +38,7 @@ describe "users" do
     @b.div(:id => "USERS-container").div(:class => "box-item user-item").wait_until_present
     @b.div(:id => "USERS-container").div(:class => "create-boxitem-button").click
     @b.div(:class => "popup-box").h2().wait_until_present
-    @b.div(:class => "popup-box").h2().text.should == "Create new user"
+    expect(@b.div(:class => "popup-box").h2().text).to eq("Create new user")
   end
 
   it "should be able to show connections for a api_user" do

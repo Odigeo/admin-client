@@ -7,7 +7,7 @@ describe LandingPageController do
     it "works for all supported apps" do
       JS_APPS.each do |name|
         get :index, :js_app_name => name
-        assigns(:js_app_name).should == name
+        expect(assigns(:js_app_name)).to eq(name)
       end
     end
     
@@ -16,16 +16,16 @@ describe LandingPageController do
       JS_APPS.each do |name|
         get :index, :js_app_name => name
         if name != 'checkout'
-          assigns(:layout).should == 'index'
+          expect(assigns(:layout)).to eq('index')
         else
-          assigns(:layout).should == 'checkout'
+          expect(assigns(:layout)).to eq('checkout')
         end
       end
     end
     
     
     it "raises a 404 exception for unsupported apps" do
-      lambda { get :index, :js_app_name => "NOWAI" }.should raise_error(ActionController::RoutingError)
+      expect { get :index, :js_app_name => "NOWAI" }.to raise_error(ActionController::RoutingError)
     end 
         
   end
